@@ -63,80 +63,21 @@ function Watchlist() {
             }
 
 
+            // ==================================
+            // IMPORTANT
+            //
+            // DO NOT FETCH PRICES HERE.
+            //
+            // currentPrice will come from
+            // DynamoDB.
+            // ==================================
+
             const stocks =
                 data.watchlist || [];
 
 
-            // ==================================
-            // GET CURRENT PRICE FOR EACH STOCK
-            // ==================================
-
-            const stocksWithPrices =
-                await Promise.all(
-
-                    stocks.map(
-                        async (stock) => {
-
-                            try {
-
-                                const priceResponse =
-                                    await fetch(
-                                        `${API_URL}/prices/${stock.symbol}`,
-                                        {
-                                            method: "GET",
-
-                                            headers: {
-                                                "Authorization":
-                                                    `Bearer ${token}`
-                                            }
-                                        }
-                                    );
-
-
-                                const priceData =
-                                    await priceResponse.json();
-
-
-                                if (!priceResponse.ok) {
-
-                                    throw new Error(
-                                        priceData.message ||
-                                        "Failed to load price"
-                                    );
-                                }
-
-
-                                return {
-                                    ...stock,
-
-                                    currentPrice:
-                                        Number(
-                                            priceData.currentPrice
-                                        )
-                                };
-
-
-                            } catch (error) {
-
-                                console.error(
-                                    `PRICE ERROR ${stock.symbol}:`,
-                                    error
-                                );
-
-
-                                return {
-                                    ...stock,
-
-                                    currentPrice: null
-                                };
-                            }
-                        }
-                    )
-                );
-
-
             setWatchlist(
-                stocksWithPrices
+                stocks
             );
 
 
@@ -160,6 +101,10 @@ function Watchlist() {
     };
 
 
+    // ==========================================
+    // LOAD ON PAGE OPEN
+    // ==========================================
+
     useEffect(() => {
 
         loadWatchlist();
@@ -171,73 +116,118 @@ function Watchlist() {
     // REMOVE FROM WATCHLIST
     // ==========================================
 
-   const removeFromWatchlist = async (symbol) => {
+    const removeFromWatchlist = async (symbol) => {
 
-    const confirmed = window.confirm(
-        `Remove ${symbol} from your watchlist?`
-    );
+        const confirmed =
+            window.confirm(
+                `Remove ${symbol} from your watchlist?`
+            );
 
-    if (!confirmed) {
-        return;
-    }
 
-    try {
+        if (!confirmed) {
+            return;
+        }
 
-        const session = await fetchAuthSession();
 
-        const token =
-            session.tokens.idToken.toString();
+        try {
 
-        console.log("Deleting:", symbol);
+            const session =
+                await fetchAuthSession();
 
-        const response = await fetch(
-            `${API_URL}/watchlist/${encodeURIComponent(symbol)}`,
-            {
-                method: "DELETE",
+            const token =
+                session.tokens.idToken.toString();
 
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+
+            console.log(
+                "Deleting:",
+                symbol
+            );
+
+
+            const response =
+                await fetch(
+                    `${API_URL}/watchlist/${encodeURIComponent(
+                        symbol
+                    )}`,
+                    {
+                        method: "DELETE",
+
+                        headers: {
+                            "Authorization":
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+
+            // ==================================
+            // SAFELY HANDLE RESPONSE
+            // ==================================
+
+            const text =
+                await response.text();
+
+            let data = {};
+
+            try {
+
+                data =
+                    text
+                        ? JSON.parse(text)
+                        : {};
+
+            } catch {
+
+                data = {
+                    message:
+                        text ||
+                        "Unknown server response"
+                };
             }
-        );
 
-        const data = await response.json();
 
-        console.log(
-            "DELETE WATCHLIST RESPONSE:",
-            response.status,
-            data
-        );
+            console.log(
+                "DELETE WATCHLIST RESPONSE:",
+                response.status,
+                data
+            );
 
-        if (!response.ok) {
 
-            throw new Error(
-                data.message ||
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to remove stock"
+                );
+            }
+
+
+            // ==================================
+            // REMOVE FROM UI IMMEDIATELY
+            // ==================================
+
+            setWatchlist(
+                (current) =>
+                    current.filter(
+                        (stock) =>
+                            stock.symbol !== symbol
+                    )
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "DELETE WATCHLIST ERROR:",
+                error
+            );
+
+            setError(
+                error.message ||
                 "Failed to remove stock"
             );
         }
-
-        // Remove from UI immediately
-        setWatchlist((current) =>
-            current.filter(
-                (stock) =>
-                    stock.symbol !== symbol
-            )
-        );
-
-    } catch (error) {
-
-        console.error(
-            "DELETE WATCHLIST ERROR:",
-            error
-        );
-
-        setError(
-            error.message ||
-            "Failed to remove stock"
-        );
-    }
-};
+    };
 
 
     // ==========================================
@@ -281,6 +271,31 @@ function Watchlist() {
                 <p>
                     Error: {error}
                 </p>
+
+
+                <button
+                    onClick={() => {
+
+                        setError("");
+                        loadWatchlist();
+
+                    }}
+                >
+                    Try Again
+                </button>
+
+
+                <br />
+                <br />
+
+
+                <Link to="/dashboard">
+
+                    <button>
+                        ← Back to Dashboard
+                    </button>
+
+                </Link>
 
             </div>
 
@@ -347,15 +362,22 @@ function Watchlist() {
                             </p>
 
 
+                            {/* ==========================
+                                CURRENT PRICE
+                            =========================== */}
+
                             <p>
 
                                 Current Price: {" "}
 
-                                {stock.currentPrice !== null
+                                {stock.currentPrice !== null &&
+                                stock.currentPrice !== undefined
                                     ? (
                                         <>
                                             ₹
-                                            {stock.currentPrice.toLocaleString()}
+                                            {Number(
+                                                stock.currentPrice
+                                            ).toLocaleString()}
                                         </>
                                     )
                                     : (
@@ -364,6 +386,25 @@ function Watchlist() {
                                 }
 
                             </p>
+
+
+                            {/* ==========================
+                                PRICE UPDATED TIME
+                            =========================== */}
+
+                            {stock.priceUpdatedAt && (
+
+                                <p>
+
+                                    Price updated: {" "}
+
+                                    {new Date(
+                                        stock.priceUpdatedAt
+                                    ).toLocaleString()}
+
+                                </p>
+
+                            )}
 
 
                             <Link
@@ -383,12 +424,14 @@ function Watchlist() {
 
 
                             <button
-    onClick={() =>
-        removeFromWatchlist(stock.symbol)
-    }
->
-    Remove
-</button>
+                                onClick={() =>
+                                    removeFromWatchlist(
+                                        stock.symbol
+                                    )
+                                }
+                            >
+                                Remove
+                            </button>
 
 
                             <hr />

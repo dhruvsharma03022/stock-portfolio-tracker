@@ -14,232 +14,515 @@ function Dashboard() {
         "https://d6by2lw4za.execute-api.eu-north-1.amazonaws.com";
 
 
-    // ==========================================
-    // DELETE INVESTMENT
-    // ==========================================
+    // =====================================================
+    // PRICE CACHE SETTINGS
+    // =====================================================
 
-    const deleteInvestment = async (investmentId) => {
+    // Price will be refreshed after 15 minutes
+    const PRICE_CACHE_TIME =
+        15 * 60 * 1000;
 
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this investment?"
-        );
 
-        if (!confirmed) {
-            return;
-        }
+    // =====================================================
+    // GET CACHED PRICE
+    // =====================================================
+
+    const getCachedPrice = (symbol) => {
 
         try {
 
-            const session = await fetchAuthSession();
-
-            const token =
-                session.tokens.idToken.toString();
-
-            const response = await fetch(
-                `${API_URL}/investments/${investmentId}`,
-                {
-                    method: "DELETE",
-
-                    headers: {
-                        "Authorization":
-                            `Bearer ${token}`
-                    }
-                }
-            );
-
-            const data =
-                await response.json();
-
-            console.log(
-                "DELETE RESPONSE:",
-                data
-            );
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
-                    "Failed to delete investment"
+            const cached =
+                localStorage.getItem(
+                    `stockPrice_${symbol}`
                 );
+
+            if (!cached) {
+                return null;
             }
 
-            setInvestments(
-                (currentInvestments) =>
-                    currentInvestments.filter(
-                        (investment) =>
-                            investment.investmentId !==
-                            investmentId
-                    )
+            const data =
+                JSON.parse(cached);
+
+
+            const age =
+                Date.now() - data.timestamp;
+
+
+            // Cache still valid
+            if (
+                age <
+                PRICE_CACHE_TIME
+            ) {
+
+                console.log(
+                    `USING CACHED PRICE FOR ${symbol}:`,
+                    data.price
+                );
+
+                return data.price;
+            }
+
+
+            // Cache expired
+            console.log(
+                `PRICE CACHE EXPIRED FOR ${symbol}`
+            );
+
+            return null;
+
+        } catch (error) {
+
+            console.error(
+                "CACHE READ ERROR:",
+                error
+            );
+
+            return null;
+        }
+    };
+
+
+    // =====================================================
+    // SAVE PRICE TO CACHE
+    // =====================================================
+
+    const savePriceToCache = (
+        symbol,
+        price
+    ) => {
+
+        try {
+
+            localStorage.setItem(
+
+                `stockPrice_${symbol}`,
+
+                JSON.stringify({
+
+                    price,
+
+                    timestamp:
+                        Date.now()
+
+                })
+
+            );
+
+            console.log(
+                `PRICE CACHED FOR ${symbol}:`,
+                price
             );
 
         } catch (error) {
 
             console.error(
-                "DELETE ERROR:",
+                "CACHE SAVE ERROR:",
                 error
-            );
-
-            setError(
-                error.message
             );
         }
     };
 
 
-    // ==========================================
-    // LOAD INVESTMENTS + LIVE PRICES
-    // ==========================================
+    // =====================================================
+    // GET PRICE
+    // =====================================================
 
-    const loadInvestments = async () => {
+    const getStockPrice = async (
+        symbol,
+        token
+    ) => {
 
-        try {
-
-            setLoading(true);
-            setError("");
-
-            const session =
-                await fetchAuthSession();
-
-            const token =
-                session.tokens.idToken.toString();
+        const cleanSymbol =
+            symbol
+                .toUpperCase()
+                .trim();
 
 
-            // ----------------------------------
-            // STEP 1: GET ALL INVESTMENTS
-            // ----------------------------------
+        // -------------------------------------------------
+        // STEP 1: CHECK CACHE
+        // -------------------------------------------------
 
-            const response = await fetch(
-                `${API_URL}/investments`,
+        const cachedPrice =
+            getCachedPrice(
+                cleanSymbol
+            );
+
+
+        if (
+            cachedPrice !== null
+        ) {
+
+            return cachedPrice;
+        }
+
+
+        // -------------------------------------------------
+        // STEP 2: CALL API ONLY IF CACHE IS EMPTY/EXPIRED
+        // -------------------------------------------------
+
+        console.log(
+            `FETCHING NEW PRICE FOR ${cleanSymbol}`
+        );
+
+
+        const response =
+            await fetch(
+                `${API_URL}/prices/${encodeURIComponent(
+                    cleanSymbol
+                )}`,
                 {
                     method: "GET",
 
                     headers: {
-                        "Authorization":
+                        Authorization:
                             `Bearer ${token}`
                     }
                 }
             );
 
-            const data =
-                await response.json();
 
-            console.log(
-                "INVESTMENTS:",
-                data
+        const data =
+            await response.json();
+
+
+        console.log(
+            "PRICE RESPONSE:",
+            cleanSymbol,
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                `Failed to load price for ${cleanSymbol}`
+            );
+        }
+
+
+        const price =
+            Number(
+                data.currentPrice
             );
 
-            if (!response.ok) {
 
-                throw new Error(
-                    data.message ||
-                    "Failed to load investments"
+        if (
+            Number.isNaN(price)
+        ) {
+
+            throw new Error(
+                `Invalid price received for ${cleanSymbol}`
+            );
+        }
+
+
+        // -------------------------------------------------
+        // STEP 3: SAVE PRICE
+        // -------------------------------------------------
+
+        savePriceToCache(
+            cleanSymbol,
+            price
+        );
+
+
+        return price;
+    };
+
+
+    // =====================================================
+    // DELETE INVESTMENT
+    // =====================================================
+
+    const deleteInvestment =
+        async (investmentId) => {
+
+            const confirmed =
+                window.confirm(
+                    "Are you sure you want to delete this investment?"
                 );
+
+
+            if (!confirmed) {
+                return;
             }
 
-            const loadedInvestments =
-                data.investments || [];
+
+            try {
+
+                const session =
+                    await fetchAuthSession();
 
 
-            // ----------------------------------
-            // STEP 2: GET LIVE PRICE
-            // FOR EACH INVESTMENT
-            // ----------------------------------
+                const token =
+                    session.tokens
+                        .idToken
+                        .toString();
 
-            const investmentsWithPrices =
+
+                const response =
+                    await fetch(
+                        `${API_URL}/investments/${investmentId}`,
+                        {
+                            method: "DELETE",
+
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "DELETE RESPONSE:",
+                    data
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Failed to delete investment"
+                    );
+                }
+
+
+                setInvestments(
+                    currentInvestments =>
+                        currentInvestments.filter(
+                            investment =>
+                                investment.investmentId !==
+                                investmentId
+                        )
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "DELETE ERROR:",
+                    error
+                );
+
+
+                setError(
+                    error.message ||
+                    "Failed to delete investment"
+                );
+            }
+        };
+
+
+    // =====================================================
+    // LOAD INVESTMENTS
+    // =====================================================
+
+    const loadInvestments =
+        async () => {
+
+            try {
+
+                setLoading(true);
+                setError("");
+
+
+                // -------------------------------------------------
+                // AUTH
+                // -------------------------------------------------
+
+                const session =
+                    await fetchAuthSession();
+
+
+                const token =
+                    session.tokens
+                        .idToken
+                        .toString();
+
+
+                // -------------------------------------------------
+                // STEP 1:
+                // GET INVESTMENTS FROM DYNAMODB
+                // -------------------------------------------------
+
+                const response =
+                    await fetch(
+                        `${API_URL}/investments`,
+                        {
+                            method: "GET",
+
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
+                            }
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "INVESTMENTS:",
+                    data
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Failed to load investments"
+                    );
+                }
+
+
+                const loadedInvestments =
+                    data.investments || [];
+
+
+                // -------------------------------------------------
+                // STEP 2:
+                // FIND UNIQUE STOCK SYMBOLS
+                // -------------------------------------------------
+
+                const uniqueSymbols = [
+                    ...new Set(
+                        loadedInvestments.map(
+                            investment =>
+                                investment.symbol
+                                    .toUpperCase()
+                                    .trim()
+                        )
+                    )
+                ];
+
+
+                console.log(
+                    "UNIQUE STOCKS:",
+                    uniqueSymbols
+                );
+
+
+                // -------------------------------------------------
+                // STEP 3:
+                // FETCH PRICES
+                //
+                // Cached prices DO NOT call API.
+                // Expired prices call API.
+                // -------------------------------------------------
+
+                const priceMap = {};
+
+
                 await Promise.all(
 
-                    loadedInvestments.map(
-                        async (investment) => {
+                    uniqueSymbols.map(
+                        async (symbol) => {
 
                             try {
 
-                                const priceResponse =
-                                    await fetch(
-                                        `${API_URL}/prices/${investment.symbol}`,
-                                        {
-                                            method: "GET",
-
-                                            headers: {
-                                                "Authorization":
-                                                    `Bearer ${token}`
-                                            }
-                                        }
+                                const price =
+                                    await getStockPrice(
+                                        symbol,
+                                        token
                                     );
 
-                                const priceData =
-                                    await priceResponse.json();
 
-                                console.log(
-                                    "PRICE RESPONSE:",
-                                    investment.symbol,
-                                    priceData
-                                );
+                                priceMap[
+                                    symbol
+                                ] = price;
 
-                                if (
-                                    !priceResponse.ok
-                                ) {
-
-                                    throw new Error(
-                                        priceData.message ||
-                                        "Failed to load price"
-                                    );
-                                }
-
-                                return {
-                                    ...investment,
-
-                                    currentPrice:
-                                        Number(
-                                            priceData.currentPrice
-                                        )
-                                };
 
                             } catch (error) {
 
                                 console.error(
-                                    `Failed to load price for ${investment.symbol}`,
+                                    `Failed to load price for ${symbol}`,
                                     error
                                 );
 
-                                return {
-                                    ...investment,
 
-                                    currentPrice:
-                                        null
-                                };
+                                priceMap[
+                                    symbol
+                                ] = null;
                             }
                         }
                     )
+
                 );
 
 
-            // ----------------------------------
-            // STEP 3: SAVE INVESTMENTS
-            // WITH LIVE PRICES
-            // ----------------------------------
+                // -------------------------------------------------
+                // STEP 4:
+                // ADD PRICE TO EACH INVESTMENT
+                // -------------------------------------------------
 
-            setInvestments(
-                investmentsWithPrices
-            );
+                const investmentsWithPrices =
+                    loadedInvestments.map(
+                        investment => {
 
-        } catch (error) {
+                            const symbol =
+                                investment.symbol
+                                    .toUpperCase()
+                                    .trim();
 
-            console.error(
-                "LOAD INVESTMENTS ERROR:",
-                error
-            );
 
-            setError(
-                error.message ||
-                "Failed to load investments"
-            );
+                            return {
 
-        } finally {
+                                ...investment,
 
-            setLoading(false);
-        }
-    };
+                                currentPrice:
+                                    priceMap[
+                                        symbol
+                                    ] ?? null
 
+                            };
+                        }
+                    );
+
+
+                // -------------------------------------------------
+                // STEP 5:
+                // SAVE TO STATE
+                // -------------------------------------------------
+
+                setInvestments(
+                    investmentsWithPrices
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "LOAD INVESTMENTS ERROR:",
+                    error
+                );
+
+
+                setError(
+                    error.message ||
+                    "Failed to load investments"
+                );
+
+
+            } finally {
+
+                setLoading(false);
+            }
+        };
+
+
+    // =====================================================
+    // LOAD ON DASHBOARD OPEN
+    // =====================================================
 
     useEffect(() => {
 
@@ -248,31 +531,32 @@ function Dashboard() {
     }, []);
 
 
-    // ==========================================
+    // =====================================================
     // LOGOUT
-    // ==========================================
+    // =====================================================
 
-    const handleLogout = async () => {
+    const handleLogout =
+        async () => {
 
-        try {
+            try {
 
-            await signOut();
+                await signOut();
 
-            navigate("/");
+                navigate("/");
 
-        } catch (error) {
+            } catch (error) {
 
-            console.error(
-                "LOGOUT ERROR:",
-                error
-            );
-        }
-    };
+                console.error(
+                    "LOGOUT ERROR:",
+                    error
+                );
+            }
+        };
 
 
-    // ==========================================
+    // =====================================================
     // PORTFOLIO CALCULATIONS
-    // ==========================================
+    // =====================================================
 
     const totalInvested =
         investments.reduce(
@@ -300,6 +584,7 @@ function Dashboard() {
                     return sum;
                 }
 
+
                 return (
                     sum +
                     (
@@ -321,16 +606,18 @@ function Dashboard() {
 
     const returnPercentage =
         totalInvested === 0
+
             ? 0
+
             : (
                 profit /
                 totalInvested
             ) * 100;
 
 
-    // ==========================================
+    // =====================================================
     // UI
-    // ==========================================
+    // =====================================================
 
     return (
 
@@ -341,9 +628,9 @@ function Dashboard() {
             </h1>
 
 
-            {/* ================================
-                NAVIGATION BUTTONS
-            ================================= */}
+            {/* ==========================================
+                NAVIGATION
+            ========================================== */}
 
             <button
                 onClick={handleLogout}
@@ -351,51 +638,71 @@ function Dashboard() {
                 Logout
             </button>
 
+
             {" "}
 
+
             <Link to="/market">
+
                 <button>
                     📊 Market
                 </button>
+
             </Link>
+
 
             {" "}
 
+
             <Link to="/watchlist">
+
                 <button>
                     ⭐ Watchlist
                 </button>
+
             </Link>
 
 
             <hr />
 
 
+            {/* ==========================================
+                LOADING
+            ========================================== */}
+
             {loading && (
 
                 <p>
-                    Loading investments and live prices...
+                    Loading investments and prices...
                 </p>
 
             )}
 
+
+            {/* ==========================================
+                ERROR
+            ========================================== */}
 
             {error && (
 
                 <p>
-                    {error}
+                    Error: {error}
                 </p>
 
             )}
 
 
-            {!loading && !error && (
+            {/* ==========================================
+                DASHBOARD
+            ========================================== */}
+
+            {!loading && (
 
                 <>
 
-                    {/* =====================
+                    {/* ==================================
                         PORTFOLIO SUMMARY
-                    ===================== */}
+                    ================================== */}
 
                     <div>
 
@@ -455,9 +762,9 @@ function Dashboard() {
                     <hr />
 
 
-                    {/* =====================
+                    {/* ==================================
                         INVESTMENTS
-                    ===================== */}
+                    ================================== */}
 
                     <h2>
                         My Investments
@@ -473,28 +780,41 @@ function Dashboard() {
                     ) : (
 
                         investments.map(
-                            (stock) => {
+                            stock => {
 
                                 const invested =
-                                    Number(stock.quantity) *
-                                    Number(stock.buyPrice);
+                                    Number(
+                                        stock.quantity
+                                    ) *
+                                    Number(
+                                        stock.buyPrice
+                                    );
 
 
                                 const stockCurrentValue =
-                                    stock.currentPrice !== null
+                                    stock.currentPrice !== null &&
+                                    stock.currentPrice !== undefined
+
                                         ? (
-                                            Number(stock.quantity) *
-                                            Number(stock.currentPrice)
+                                            Number(
+                                                stock.quantity
+                                            ) *
+                                            Number(
+                                                stock.currentPrice
+                                            )
                                         )
+
                                         : null;
 
 
                                 const stockProfit =
                                     stockCurrentValue !== null
+
                                         ? (
                                             stockCurrentValue -
                                             invested
                                         )
+
                                         : null;
 
 
@@ -517,7 +837,7 @@ function Dashboard() {
 
 
                                         <p>
-                                            Quantity: {" "}
+                                            Quantity:{" "}
                                             {stock.quantity}
                                         </p>
 
@@ -531,16 +851,20 @@ function Dashboard() {
 
 
                                         <p>
-                                            Current Price: {" "}
+
+                                            Current Price:{" "}
 
                                             {stock.currentPrice !== null
+
                                                 ? (
                                                     <>
                                                         ₹
-                                                        {stock.currentPrice
-                                                            .toLocaleString()}
+                                                        {Number(
+                                                            stock.currentPrice
+                                                        ).toLocaleString()}
                                                     </>
                                                 )
+
                                                 : (
                                                     "Unavailable"
                                                 )
@@ -556,16 +880,18 @@ function Dashboard() {
 
 
                                         <p>
-                                            Current Value: {" "}
+
+                                            Current Value:{" "}
 
                                             {stockCurrentValue !== null
+
                                                 ? (
                                                     <>
                                                         ₹
-                                                        {stockCurrentValue
-                                                            .toLocaleString()}
+                                                        {stockCurrentValue.toLocaleString()}
                                                     </>
                                                 )
+
                                                 : (
                                                     "Unavailable"
                                                 )
@@ -575,16 +901,18 @@ function Dashboard() {
 
 
                                         <p>
-                                            Profit / Loss: {" "}
+
+                                            Profit / Loss:{" "}
 
                                             {stockProfit !== null
+
                                                 ? (
                                                     <>
                                                         ₹
-                                                        {stockProfit
-                                                            .toLocaleString()}
+                                                        {stockProfit.toLocaleString()}
                                                     </>
                                                 )
+
                                                 : (
                                                     "Unavailable"
                                                 )
@@ -622,11 +950,16 @@ function Dashboard() {
                                     </div>
 
                                 );
+
                             }
                         )
 
                     )}
 
+
+                    {/* ==================================
+                        ADD INVESTMENT
+                    ================================== */}
 
                     <Link
                         to="/add-investment"

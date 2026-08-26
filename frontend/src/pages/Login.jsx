@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { signIn } from "aws-amplify/auth";
+import {
+    signIn,
+    fetchAuthSession
+} from "aws-amplify/auth";
 import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
@@ -24,8 +27,16 @@ function Login() {
             console.log(result);
 
             if (result.isSignedIn) {
-                navigate("/dashboard");
-            }
+
+    const session = await fetchAuthSession();
+
+    const token =
+        session.tokens.idToken.toString();
+
+    console.log("MY ID TOKEN:", token);
+
+    navigate("/dashboard");
+}
 
         } catch (err) {
             console.log(err);
@@ -71,7 +82,11 @@ function Login() {
                 </div>
 
                 <br />
-
+                <p>
+    <Link to="/forgot-password">
+        Forgot Password?
+    </Link>
+</p>
                 <button type="submit">
                     Login
                 </button>

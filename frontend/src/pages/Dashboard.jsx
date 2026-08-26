@@ -63,9 +63,6 @@ function Dashboard() {
                 );
             }
 
-
-            // Remove investment immediately
-
             setInvestments(
                 (currentInvestments) =>
                     currentInvestments.filter(
@@ -123,16 +120,13 @@ function Dashboard() {
                 }
             );
 
-
             const data =
                 await response.json();
-
 
             console.log(
                 "INVESTMENTS:",
                 data
             );
-
 
             if (!response.ok) {
 
@@ -141,7 +135,6 @@ function Dashboard() {
                     "Failed to load investments"
                 );
             }
-
 
             const loadedInvestments =
                 data.investments || [];
@@ -173,17 +166,14 @@ function Dashboard() {
                                         }
                                     );
 
-
                                 const priceData =
                                     await priceResponse.json();
-
 
                                 console.log(
                                     "PRICE RESPONSE:",
                                     investment.symbol,
                                     priceData
                                 );
-
 
                                 if (
                                     !priceResponse.ok
@@ -194,7 +184,6 @@ function Dashboard() {
                                         "Failed to load price"
                                     );
                                 }
-
 
                                 return {
                                     ...investment,
@@ -211,10 +200,6 @@ function Dashboard() {
                                     `Failed to load price for ${investment.symbol}`,
                                     error
                                 );
-
-
-                                // Keep investment even if
-                                // its price fails to load
 
                                 return {
                                     ...investment,
@@ -236,7 +221,6 @@ function Dashboard() {
             setInvestments(
                 investmentsWithPrices
             );
-
 
         } catch (error) {
 
@@ -308,9 +292,6 @@ function Dashboard() {
         investments.reduce(
             (sum, stock) => {
 
-                // If price could not load,
-                // don't add it to live value
-
                 if (
                     stock.currentPrice === null ||
                     stock.currentPrice === undefined
@@ -318,7 +299,6 @@ function Dashboard() {
 
                     return sum;
                 }
-
 
                 return (
                     sum +
@@ -361,11 +341,31 @@ function Dashboard() {
             </h1>
 
 
+            {/* ================================
+                NAVIGATION BUTTONS
+            ================================= */}
+
             <button
                 onClick={handleLogout}
             >
                 Logout
             </button>
+
+            {" "}
+
+            <Link to="/market">
+                <button>
+                    📊 Market
+                </button>
+            </Link>
+
+            {" "}
+
+            <Link to="/watchlist">
+                <button>
+                    ⭐ Watchlist
+                </button>
+            </Link>
 
 
             <hr />
@@ -603,7 +603,6 @@ function Dashboard() {
 
 
                                         <br />
-
                                         <br />
 
 

@@ -13,7 +13,8 @@ function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const [checkingAuth, setCheckingAuth] = useState(true);
+const [checkingAuth, setCheckingAuth] = useState(true);
+const [loggingIn, setLoggingIn] = useState(false);
 
     // =====================================================
     // CHECK IF USER IS ALREADY LOGGED IN
@@ -49,48 +50,38 @@ function Login() {
     // =====================================================
 
     const handleLogin = async (e) => {
+    e.preventDefault();
 
-        e.preventDefault();
+    try {
+        setError("");
+        setLoggingIn(true);
 
-        try {
+        const result = await signIn({
+            username: email.trim(),
+            password: password
+        });
 
-            setError("");
+        console.log("LOGIN RESULT:", result);
 
-            const result = await signIn({
-                username: email.trim(),
-                password: password
+        if (result.isSignedIn) {
+            await fetchAuthSession();
+
+            navigate("/dashboard", {
+                replace: true
             });
-
-            console.log("LOGIN RESULT:", result);
-
-            if (result.isSignedIn) {
-
-                const session =
-                    await fetchAuthSession();
-
-                console.log(
-                    "LOGIN SUCCESS:",
-                    session.tokens?.idToken?.toString()
-                );
-
-                navigate("/dashboard", {
-                    replace: true
-                });
-            }
-
-        } catch (err) {
-
-            console.error(
-                "LOGIN ERROR:",
-                err
-            );
-
-            setError(
-                err.message ||
-                "Invalid email or password"
-            );
         }
-    };
+
+    } catch (err) {
+        console.error("LOGIN ERROR:", err);
+
+        setError(
+            err.message ||
+            "Invalid email or password"
+        );
+
+        setLoggingIn(false);
+    }
+};
 
 
     // =====================================================
@@ -196,11 +187,19 @@ function Login() {
 
 
                     <button
-                        className="btn btn-primary btn-block"
-                        type="submit"
-                    >
-                        Login
-                    </button>
+    className="btn btn-primary btn-block"
+    type="submit"
+    disabled={loggingIn}
+>
+    {loggingIn ? (
+        <>
+            <span className="login-spinner"></span>
+            Logging in...
+        </>
+    ) : (
+        "Login"
+    )}
+</button>
 
                 </form>
 

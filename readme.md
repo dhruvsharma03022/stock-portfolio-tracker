@@ -1,4 +1,4 @@
-## Hosted website link:https://stock-portfolio-tracker-khaki.vercel.app/##
+## Hosted website link:https://stock-portfolio-tracker-khaki.vercel.app/
 # Stock-portfolio-tracker
 
 It is a SaaS platform where a user can keep track of their stock portfolio in a single website. This platform incorporates AWS for the backend and React for the frontend.

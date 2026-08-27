@@ -96,5 +96,4 @@ INDIAN_API_KEY=XXXXXXXX
 ```
 
 ## Control flow and system architecture
-
-![alt text](image.png)
+![alt text](image-1.png)

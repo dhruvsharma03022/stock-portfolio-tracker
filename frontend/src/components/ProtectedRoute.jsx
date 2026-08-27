@@ -10,7 +10,6 @@ function ProtectedRoute({ children }) {
 
     useEffect(() => {
         const checkUser = async () => {
-
             const currentUser = await getLoggedInUser();
 
             setUser(currentUser);
@@ -23,7 +22,9 @@ function ProtectedRoute({ children }) {
     if (loading) {
         return (
             <div className="state-page">
-                <p className="loading-text">Checking authentication...</p>
+                <p className="loading-text">
+                    Checking authentication...
+                </p>
             </div>
         );
     }

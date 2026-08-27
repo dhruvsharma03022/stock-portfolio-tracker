@@ -5,18 +5,16 @@ function Navbar() {
 
     const navigate = useNavigate();
 
-    const handleLogout = async () => {
+   
 
-        try {
-
-            await signOut();
-            navigate("/");
-
-        } catch (error) {
-
-            console.error("LOGOUT ERROR:", error);
-        }
-    };
+const handleLogout = async () => {
+    try {
+        await signOut();
+        navigate("/", { replace: true });
+    } catch (error) {
+        console.error("Logout error:", error);
+    }
+};
 
     const navLinkClass = ({ isActive }) =>
         `navbar-link${isActive ? " active" : ""}`;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getLoggedInUser } from "../services/auth";
+import Navbar from "./Navbar";
 
 function ProtectedRoute({ children }) {
 
@@ -20,14 +21,23 @@ function ProtectedRoute({ children }) {
     }, []);
 
     if (loading) {
-        return <p>Checking authentication...</p>;
+        return (
+            <div className="state-page">
+                <p className="loading-text">Checking authentication...</p>
+            </div>
+        );
     }
 
     if (!user) {
         return <Navigate to="/" replace />;
     }
 
-    return children;
+    return (
+        <>
+            <Navbar />
+            {children}
+        </>
+    );
 }
 
 export default ProtectedRoute;

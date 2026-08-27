@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./App.css";
 import Watchlist from "./pages/Watchlist";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -11,7 +12,6 @@ import ResetPassword from "./pages/ResetPassword";
 import Market from "./pages/Market";
 import ProtectedRoute from "./components/ProtectedRoute";
 import WatchlistDetails from "./pages/WatchlistDetails";
-import "./App.css";
 function App() {
     return (
         <BrowserRouter>
@@ -62,12 +62,20 @@ function App() {
 
                 <Route
                     path="/investment/:investmentId"
-                    element={<InvestmentDetails />}
+                    element={
+                        <ProtectedRoute>
+                            <InvestmentDetails />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route
                     path="/add-investment"
-                    element={<AddInvestment />}
+                    element={
+                        <ProtectedRoute>
+                            <AddInvestment />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route

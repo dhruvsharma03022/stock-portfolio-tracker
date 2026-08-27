@@ -284,12 +284,6 @@ function Watchlist() {
                     >
                         Try Again
                     </button>
-
-                    <Link to="/dashboard">
-                        <button className="btn btn-ghost">
-                            ← Back to Dashboard
-                        </button>
-                    </Link>
                 </div>
 
             </div>
@@ -311,14 +305,6 @@ function Watchlist() {
                 <h1 className="topbar-title">
                     My Watchlist
                 </h1>
-
-                <div className="topbar-actions">
-                    <Link to="/dashboard">
-                        <button className="btn btn-secondary">
-                            ← Back to Dashboard
-                        </button>
-                    </Link>
-                </div>
             </div>
 
 

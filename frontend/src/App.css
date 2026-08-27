@@ -14,6 +14,18 @@
   flex-direction: column;
   align-items: center;
   padding: 0 20px 60px;
+  animation: page-fade-in 260ms ease;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .page-inner {
@@ -224,6 +236,110 @@
 }
 
 /* ---------------------------------------------------------
+   Navbar
+--------------------------------------------------------- */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  width: 100%;
+  background: rgba(13, 18, 32, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar-inner {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text) !important;
+  text-decoration: none !important;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.navbar-brand-mark {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.navbar-link {
+  color: var(--text-muted) !important;
+  text-decoration: none !important;
+  font-size: 14.5px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition), background var(--transition);
+}
+
+.navbar-link:hover {
+  color: var(--text) !important;
+  background: var(--surface-2);
+}
+
+.navbar-link.active {
+  color: var(--text) !important;
+  background: var(--surface-2);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.navbar-add-btn {
+  text-decoration: none !important;
+}
+
+@media (max-width: 720px) {
+  .navbar-brand-text {
+    display: none;
+  }
+
+  .navbar-add-btn span,
+  .navbar-add-btn {
+    padding: 8px 12px;
+  }
+
+  .navbar-inner {
+    gap: 14px;
+  }
+
+  .navbar-links {
+    gap: 0;
+  }
+
+  .navbar-link {
+    padding: 8px 10px;
+    font-size: 13.5px;
+  }
+}
+
+/* ---------------------------------------------------------
    Topbar (Dashboard / Watchlist / Market)
 --------------------------------------------------------- */
 
@@ -233,7 +349,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  padding: 32px 0 24px;
+  padding: 28px 0 20px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 28px;
 }
@@ -311,11 +427,18 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 22px 24px;
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 
 .item-card:hover {
   border-color: #313a5c;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.summary-card,
+.auth-card {
+  transition: border-color var(--transition);
 }
 
 .item-card-header {

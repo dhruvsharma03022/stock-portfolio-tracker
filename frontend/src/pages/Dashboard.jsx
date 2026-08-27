@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { signOut, fetchAuthSession } from "aws-amplify/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
 
 function Dashboard() {
@@ -532,28 +532,6 @@ function Dashboard() {
 
 
     // =====================================================
-    // LOGOUT
-    // =====================================================
-
-    const handleLogout =
-        async () => {
-
-            try {
-
-                await signOut();
-
-                navigate("/");
-
-            } catch (error) {
-
-                console.error(
-                    "LOGOUT ERROR:",
-                    error
-                );
-            }
-        };
-
-
     // =====================================================
     // PORTFOLIO CALCULATIONS
     // =====================================================
@@ -628,28 +606,6 @@ function Dashboard() {
                 <h1 className="topbar-title">
                     My Portfolio
                 </h1>
-
-                {/* ==========================================
-                    NAVIGATION
-                ========================================== */}
-
-                <div className="topbar-actions">
-                    <Link to="/market">
-                        <button className="btn btn-secondary">
-                            📊 Market
-                        </button>
-                    </Link>
-
-                    <Link to="/watchlist">
-                        <button className="btn btn-secondary">
-                            ⭐ Watchlist
-                        </button>
-                    </Link>
-
-                    <button className="btn btn-ghost" onClick={handleLogout}>
-                        Logout
-                    </button>
-                </div>
             </div>
 
 

@@ -585,39 +585,32 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 };
     return (
 
-        <div
-            style={{
-                maxWidth: "1150px",
-                margin: "30px auto",
-                padding: "20px",
-                fontFamily:
-                    "Arial, sans-serif",
-                color: "#1f2937"
-            }}
-        >
+        <div className="page">
+          <div className="page-inner">
 
             {/* =====================================
                 PAGE TITLE
             ===================================== */}
 
-            <h1>
-                Market Explorer
-            </h1>
+            <div className="topbar">
+                <h1 className="topbar-title">
+                    Market Explorer
+                </h1>
+            </div>
 
 
             {/* =====================================
                 SEARCH
             ===================================== */}
 
-            <div>
+            <div className="form-group stock-search">
 
-                <label>
+                <label className="form-label">
                     Search Company
                 </label>
 
-                <br />
-
                 <input
+                    className="form-input"
                     type="text"
                     placeholder="Search TCS, Infosys, Reliance..."
                     value={searchQuery}
@@ -626,16 +619,6 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                             e.target.value
                         )
                     }
-
-                    style={{
-                        width: "350px",
-                        maxWidth: "100%",
-                        padding: "12px",
-                        fontSize: "16px",
-                        border:
-                            "1px solid #ccc",
-                        borderRadius: "6px"
-                    }}
                 />
 
 
@@ -646,32 +629,13 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                 {showDropdown &&
                     stocks.length > 0 && (
 
-                    <div
-                        style={{
-                            border:
-                                "1px solid #ccc",
-
-                            width:
-                                "350px",
-
-                            maxWidth:
-                                "100%",
-
-                            maxHeight:
-                                "250px",
-
-                            overflowY:
-                                "auto",
-
-                            background:
-                                "white"
-                        }}
-                    >
+                    <div className="stock-dropdown">
 
                         {stocks.map(
                             (stock) => (
 
                                 <div
+                                    className="stock-dropdown-item"
                                     key={
                                         stock.symbol
                                     }
@@ -681,26 +645,13 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                                             stock
                                         )
                                     }
-
-                                    style={{
-                                        padding:
-                                            "12px",
-
-                                        cursor:
-                                            "pointer",
-
-                                        borderBottom:
-                                            "1px solid #eee"
-                                    }}
                                 >
 
-                                    <strong>
+                                    <strong className="stock-dropdown-name">
                                         {stock.name}
                                     </strong>
 
-                                    <br />
-
-                                    <small>
+                                    <small className="stock-dropdown-meta">
                                         {stock.symbol}
                                         {" • "}
                                         {stock.exchange}
@@ -718,20 +669,13 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
             </div>
 
 
-            <br />
-
-
             {/* =====================================
                 ERROR
             ===================================== */}
 
             {error && (
 
-                <p
-                    style={{
-                        color: "red"
-                    }}
-                >
+                <p className="error-text">
                     {error}
                 </p>
 
@@ -744,7 +688,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
             {loading && (
 
-                <p>
+                <p className="loading-text">
                     Loading stock data...
                 </p>
 
@@ -763,47 +707,28 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
                     {/* STOCK NAME */}
 
-                    <h2
-                        style={{
-                            marginBottom: "5px"
-                        }}
-                    >
-                        {selectedStock.name}
-                    </h2>
+                    <div className="detail-header">
+                        <div>
+                            <h2 className="detail-symbol">
+                                {selectedStock.name}
+                            </h2>
 
-
-                    <p
-                        style={{
-                            color: "#6b7280"
-                        }}
-                    >
-                        {selectedStock.symbol}
-                        {" • "}
-                        {selectedStock.exchange}
-                    </p>
+                            <p className="detail-company">
+                                {selectedStock.symbol}
+                                {" • "}
+                                {selectedStock.exchange}
+                            </p>
+                        </div>
+                    </div>
 
 
                     {/* =================================
                         CURRENT PRICE
                     ================================= */}
 
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "15px",
-                            flexWrap: "wrap",
-                            marginTop: "25px"
-                        }}
-                    >
+                    <div className="price-row">
 
-                        <div
-                            style={{
-                                fontSize: "42px",
-                                fontWeight: "500"
-                            }}
-                        >
-
+                        <div className="price-current">
                             ₹
                             {currentPrice !== null
                                 ? currentPrice.toLocaleString(
@@ -818,7 +743,6 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                                 )
                                 : "--"
                             }
-
                         </div>
 
 
@@ -826,29 +750,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
                             <>
 
-                                <div
-                                    style={{
-                                        background:
-                                            isPositive
-                                                ? "#e7f3ec"
-                                                : "#fde8e8",
-
-                                        color:
-                                            chartColor,
-
-                                        padding:
-                                            "8px 14px",
-
-                                        borderRadius:
-                                            "10px",
-
-                                        fontSize:
-                                            "18px",
-
-                                        fontWeight:
-                                            "500"
-                                    }}
-                                >
+                                <div className={`price-change-badge ${isPositive ? "positive" : "negative"}`}>
 
                                     {isPositive
                                         ? "↑"
@@ -866,15 +768,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                                 </div>
 
 
-                                <div
-                                    style={{
-                                        color:
-                                            chartColor,
-
-                                        fontSize:
-                                            "18px"
-                                    }}
-                                >
+                                <div className={`price-change-abs ${isPositive ? "positive" : "negative"}`}>
 
                                     {chartData.difference >= 0
                                         ? "+"
@@ -895,42 +789,13 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                     </div>
 
 
-                    <hr
-                        style={{
-                            margin:
-                                "30px 0"
-                        }}
-                    />
-
-
                     {/* =================================
                         PERIOD
                     ================================= */}
 
-                    <div
-                        style={{
-                            display: "flex",
-                            gap: "30px",
-                            borderBottom:
-                                "1px solid #e5e7eb"
-                        }}
-                    >
+                    <div className="period-tabs">
 
-                        <div
-                            style={{
-                                padding:
-                                    "12px 5px",
-
-                                color:
-                                    "#2563eb",
-
-                                borderBottom:
-                                    "3px solid #2563eb",
-
-                                fontWeight:
-                                    "600"
-                            }}
-                        >
+                        <div className="period-tab active">
                             1M
                         </div>
 
@@ -941,32 +806,18 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                         CHART
                     ================================= */}
 
-                    <h3>
+                    <h3 style={{ marginTop: "24px" }}>
                         1 Month Price History
                     </h3>
 
 
-                    <div
-                        style={{
-                            width: "100%",
-                            marginTop: "20px",
-                            overflowX: "auto",
-                            background: "#ffffff"
-                        }}
-                    >
+                    <div className="chart-card">
 
                         {points.length > 0 ? (
 
                             <svg
                                 viewBox={`0 0 ${chartWidth} ${chartHeight}`}
                                 width="100%"
-                                style={{
-                                    minWidth:
-                                        "700px",
-
-                                    overflow:
-                                        "visible"
-                                }}
                             >
 
                                 <defs>
@@ -1045,7 +896,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                                                     y1={y}
                                                     y2={y}
 
-                                                    stroke="#e5e7eb"
+                                                    stroke="#262d45"
                                                 />
 
 
@@ -1057,7 +908,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
                                                     fontSize="15"
 
-                                                    fill="#4b5563"
+                                                    fill="#9aa1b8"
                                                 >
                                                     ₹
                                                     {Math.round(
@@ -1168,7 +1019,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                                                 graphHeight
                                             }
 
-                                            stroke="#6b7280"
+                                            stroke="#656d87"
 
                                             strokeDasharray="4 5"
                                         />
@@ -1215,9 +1066,9 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
                                             rx="8"
 
-                                            fill="white"
+                                            fill="#1a2036"
 
-                                            stroke="#d1d5db"
+                                            stroke="#262d45"
                                         />
 
 
@@ -1241,7 +1092,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
                                             fontSize="16"
 
-                                            fill="#111827"
+                                            fill="#e7e9f2"
                                         >
 
                                             ₹
@@ -1279,7 +1130,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
                                             fontSize="13"
 
-                                            fill="#6b7280"
+                                            fill="#9aa1b8"
                                         >
 
                                             {hoveredPoint.date}
@@ -1327,7 +1178,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
                                                 fontSize="14"
 
-                                                fill="#4b5563"
+                                                fill="#9aa1b8"
                                             >
                                                 {
                                                     point.date
@@ -1343,24 +1194,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
                             !loading && (
 
-                                <div
-                                    style={{
-                                        height:
-                                            "350px",
-
-                                        display:
-                                            "flex",
-
-                                        alignItems:
-                                            "center",
-
-                                        justifyContent:
-                                            "center",
-
-                                        color:
-                                            "#6b7280"
-                                    }}
-                                >
+                                <div className="chart-empty">
                                     No price history available
                                 </div>
 
@@ -1375,13 +1209,10 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
                         WATCHLIST BUTTON
                     ================================= */}
 
-                    <div
-                        style={{
-                            marginTop: "30px"
-                        }}
-                    >
+                    <div className="back-button-row">
 
                         <button
+    className="btn btn-primary"
     onClick={handleAddToWatchlist}
     disabled={watchlistLoading}
 >
@@ -1392,7 +1223,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 </button>
 
 {watchlistMessage && (
-    <p>
+    <p className="loading-text" style={{ marginTop: "10px" }}>
         {watchlistMessage}
     </p>
 )}
@@ -1403,6 +1234,7 @@ const [watchlistMessage, setWatchlistMessage] = useState("");
 
             )}
 
+          </div>
         </div>
 
     );

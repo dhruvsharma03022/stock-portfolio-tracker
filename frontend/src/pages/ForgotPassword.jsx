@@ -56,51 +56,46 @@ function ForgotPassword() {
     };
 
     return (
-        <div>
+        <div className="auth-page">
+            <div className="auth-card">
 
-            <h1>Forgot Password</h1>
+                <h1 className="auth-title">Forgot Password</h1>
+                <p className="auth-subtitle">
+                    Enter your email address and we'll send you
+                    a verification code.
+                </p>
 
-            <p>
-                Enter your email address and we'll send you
-                a verification code.
-            </p>
+                <form className="auth-form" onSubmit={handleForgotPassword}>
 
-            <form onSubmit={handleForgotPassword}>
+                    <div className="form-group">
+                        <label className="form-label">Email</label>
+                        <input
+                            className="form-input"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) =>
+                                setEmail(e.target.value)
+                            }
+                            required
+                        />
+                    </div>
 
-                <div>
+                    {message && (
+                        <p className="form-message">{message}</p>
+                    )}
 
-                    <label>Email</label>
+                    {error && (
+                        <p className="form-error">{error}</p>
+                    )}
 
-                    <br />
+                    <button className="btn btn-primary btn-block" type="submit">
+                        Send Verification Code
+                    </button>
 
-                    <input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) =>
-                            setEmail(e.target.value)
-                        }
-                        required
-                    />
+                </form>
 
-                </div>
-
-                <br />
-
-                <button type="submit">
-                    Send Verification Code
-                </button>
-
-            </form>
-
-            {message && (
-                <p>{message}</p>
-            )}
-
-            {error && (
-                <p>{error}</p>
-            )}
-
+            </div>
         </div>
     );
 }

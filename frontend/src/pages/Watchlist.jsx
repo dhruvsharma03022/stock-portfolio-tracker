@@ -238,13 +238,13 @@ function Watchlist() {
 
         return (
 
-            <div>
+            <div className="state-page">
 
                 <h1>
                     My Watchlist
                 </h1>
 
-                <p>
+                <p className="loading-text">
                     Loading watchlist...
                 </p>
 
@@ -262,40 +262,35 @@ function Watchlist() {
 
         return (
 
-            <div>
+            <div className="state-page">
 
                 <h1>
                     My Watchlist
                 </h1>
 
-                <p>
+                <p className="error-text">
                     Error: {error}
                 </p>
 
+                <div className="item-card-actions">
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => {
 
-                <button
-                    onClick={() => {
+                            setError("");
+                            loadWatchlist();
 
-                        setError("");
-                        loadWatchlist();
-
-                    }}
-                >
-                    Try Again
-                </button>
-
-
-                <br />
-                <br />
-
-
-                <Link to="/dashboard">
-
-                    <button>
-                        ← Back to Dashboard
+                        }}
+                    >
+                        Try Again
                     </button>
 
-                </Link>
+                    <Link to="/dashboard">
+                        <button className="btn btn-ghost">
+                            ← Back to Dashboard
+                        </button>
+                    </Link>
+                </div>
 
             </div>
 
@@ -309,140 +304,114 @@ function Watchlist() {
 
     return (
 
-        <div>
+        <div className="page">
+          <div className="page-inner">
 
-            <h1>
-                My Watchlist
-            </h1>
+            <div className="topbar">
+                <h1 className="topbar-title">
+                    My Watchlist
+                </h1>
 
-
-            <Link to="/dashboard">
-
-                <button>
-                    ← Back to Dashboard
-                </button>
-
-            </Link>
-
-
-            <br />
-            <br />
+                <div className="topbar-actions">
+                    <Link to="/dashboard">
+                        <button className="btn btn-secondary">
+                            ← Back to Dashboard
+                        </button>
+                    </Link>
+                </div>
+            </div>
 
 
             {watchlist.length === 0 ? (
 
-                <p>
+                <p className="empty-state">
                     Your watchlist is empty.
                 </p>
 
             ) : (
 
-                watchlist.map(
+                <div className="card-list">
+                {watchlist.map(
                     (stock) => (
 
                         <div
+                            className="item-card"
                             key={
                                 stock.investmentId
                             }
                         >
 
-                            <h2>
-                                {stock.symbol}
-                            </h2>
+                            <div className="item-card-header">
+                                <span className="item-symbol">
+                                    {stock.symbol}
+                                </span>
+                            </div>
 
-
-                            <p>
+                            <p className="item-company">
                                 {stock.companyName}
                             </p>
 
+                            <div className="item-detail-grid">
 
-                            <p>
-                                Exchange: {" "}
-                                {stock.exchange}
-                            </p>
+                                <div>
+                                    <div className="item-detail-label">Exchange</div>
+                                    <div className="item-detail-value">{stock.exchange}</div>
+                                </div>
 
+                                <div>
+                                    <div className="item-detail-label">Current Price</div>
+                                    <div className="item-detail-value">
+                                        {stock.currentPrice !== null &&
+                                        stock.currentPrice !== undefined
+                                            ? <>₹{Number(stock.currentPrice).toLocaleString()}</>
+                                            : "Unavailable"
+                                        }
+                                    </div>
+                                </div>
 
-                            {/* ==========================
-                                CURRENT PRICE
-                            =========================== */}
+                                {stock.priceUpdatedAt && (
+                                    <div>
+                                        <div className="item-detail-label">Price Updated</div>
+                                        <div className="item-detail-value">
+                                            {new Date(stock.priceUpdatedAt).toLocaleString()}
+                                        </div>
+                                    </div>
+                                )}
 
-                            <p>
+                            </div>
 
-                                Current Price: {" "}
+                            <div className="item-card-actions">
+                                <Link
+                                    to={
+                                        `/watchlist/${stock.symbol}`
+                                    }
+                                >
+                                    <button className="btn btn-secondary btn-sm">
+                                        View Details
+                                    </button>
+                                </Link>
 
-                                {stock.currentPrice !== null &&
-                                stock.currentPrice !== undefined
-                                    ? (
-                                        <>
-                                            ₹
-                                            {Number(
-                                                stock.currentPrice
-                                            ).toLocaleString()}
-                                        </>
-                                    )
-                                    : (
-                                        "Unavailable"
-                                    )
-                                }
-
-                            </p>
-
-
-                            {/* ==========================
-                                PRICE UPDATED TIME
-                            =========================== */}
-
-                            {stock.priceUpdatedAt && (
-
-                                <p>
-
-                                    Price updated: {" "}
-
-                                    {new Date(
-                                        stock.priceUpdatedAt
-                                    ).toLocaleString()}
-
-                                </p>
-
-                            )}
-
-
-                            <Link
-                                to={
-                                    `/watchlist/${stock.symbol}`
-                                }
-                            >
-
-                                <button>
-                                    View Details
+                                <button
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() =>
+                                        removeFromWatchlist(
+                                            stock.symbol
+                                        )
+                                    }
+                                >
+                                    Remove
                                 </button>
-
-                            </Link>
-
-
-                            {" "}
-
-
-                            <button
-                                onClick={() =>
-                                    removeFromWatchlist(
-                                        stock.symbol
-                                    )
-                                }
-                            >
-                                Remove
-                            </button>
-
-
-                            <hr />
+                            </div>
 
                         </div>
 
                     )
-                )
+                )}
+                </div>
 
             )}
 
+          </div>
         </div>
 
     );

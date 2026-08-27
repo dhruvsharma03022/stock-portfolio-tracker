@@ -357,12 +357,7 @@ function WatchlistDetails() {
 
         return (
 
-            <div
-                style={{
-                    padding: "60px",
-                    textAlign: "center"
-                }}
-            >
+            <div className="state-page">
 
                 <h1>
                     Loading stock...
@@ -383,28 +378,19 @@ function WatchlistDetails() {
 
         return (
 
-            <div
-                style={{
-                    padding: "60px",
-                    textAlign: "center"
-                }}
-            >
+            <div className="state-page">
 
                 <h1>
                     Stock Details
                 </h1>
 
 
-                <p
-                    style={{
-                        color: "red"
-                    }}
-                >
+                <p className="error-text">
                     {error}
                 </p>
 
 
-                <button
+                <button className="btn btn-secondary"
                     onClick={() =>
                         navigate("/watchlist")
                     }
@@ -545,66 +531,31 @@ function WatchlistDetails() {
 
     return (
 
-        <div
-            style={{
-                maxWidth: "1150px",
-                margin: "30px auto",
-                padding: "20px",
-                fontFamily:
-                    "Arial, sans-serif",
-                color: "#1f2937"
-            }}
-        >
+        <div className="page">
+          <div className="page-inner">
 
 
             {/* ================================= */}
             {/* HEADER */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent:
-                        "space-between",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: "20px"
-                }}
-            >
+            <div className="detail-header">
 
                 <div>
 
-                    <h1
-                        style={{
-                            margin: 0,
-                            fontSize: "42px",
-                            fontWeight: "600"
-                        }}
-                    >
+                    <h1 className="detail-symbol">
                         {stock.symbol}
                     </h1>
 
 
-                    <p
-                        style={{
-                            color: "#6b7280",
-                            fontSize: "17px"
-                        }}
-                    >
+                    <p className="detail-company">
                         {stock.companyName}
                     </p>
 
                 </div>
 
 
-                <div
-                    style={{
-                        background: "#f3f4f6",
-                        padding: "10px 18px",
-                        borderRadius: "20px",
-                        fontSize: "15px"
-                    }}
-                >
+                <div className="status-pill">
                     ⭐ In Watchlist
                 </div>
 
@@ -615,22 +566,9 @@ function WatchlistDetails() {
             {/* CURRENT PRICE */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "18px",
-                    flexWrap: "wrap",
-                    marginTop: "30px"
-                }}
-            >
+            <div className="price-row">
 
-                <div
-                    style={{
-                        fontSize: "48px",
-                        fontWeight: "500"
-                    }}
-                >
+                <div className="price-current">
                     ₹
                     {currentPrice !== null
                         ? currentPrice.toLocaleString(
@@ -649,29 +587,7 @@ function WatchlistDetails() {
 
                     <>
 
-                        <div
-                            style={{
-                                background:
-                                    isPositive
-                                        ? "#e7f3ec"
-                                        : "#fde8e8",
-
-                                color:
-                                    chartColor,
-
-                                padding:
-                                    "10px 16px",
-
-                                borderRadius:
-                                    "12px",
-
-                                fontSize:
-                                    "21px",
-
-                                fontWeight:
-                                    "500"
-                            }}
-                        >
+                        <div className={`price-change-badge ${isPositive ? "positive" : "negative"}`}>
 
                             {isPositive
                                 ? "↑"
@@ -687,12 +603,7 @@ function WatchlistDetails() {
                         </div>
 
 
-                        <div
-                            style={{
-                                fontSize: "21px",
-                                color: chartColor
-                            }}
-                        >
+                        <div className={`price-change-abs ${isPositive ? "positive" : "negative"}`}>
 
                             {chartData.difference >= 0
                                 ? "+"
@@ -717,16 +628,7 @@ function WatchlistDetails() {
             {/* PERIOD BUTTONS */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent:
-                        "space-between",
-                    marginTop: "35px",
-                    borderBottom:
-                        "1px solid #e5e7eb"
-                }}
-            >
+            <div className="period-tabs">
 
                 {[
                     "1D",
@@ -742,23 +644,7 @@ function WatchlistDetails() {
 
                         <div
                             key={period}
-                            style={{
-                                padding:
-                                    "14px 10px",
-
-                                color:
-                                    index === 2
-                                        ? "#2563eb"
-                                        : "#4b5563",
-
-                                fontSize:
-                                    "18px",
-
-                                borderBottom:
-                                    index === 2
-                                        ? "4px solid #2563eb"
-                                        : "4px solid transparent"
-                            }}
+                            className={`period-tab ${index === 2 ? "active" : ""}`}
                         >
                             {period}
                         </div>
@@ -773,14 +659,7 @@ function WatchlistDetails() {
             {/* GRAPH */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    width: "100%",
-                    marginTop: "20px",
-                    overflowX: "auto",
-                    background: "#ffffff"
-                }}
-            >
+            <div className="chart-card">
 
                 {points.length > 0 ? (
 
@@ -790,11 +669,6 @@ function WatchlistDetails() {
                         }
 
                         width="100%"
-
-                        style={{
-                            minWidth: "700px",
-                            overflow: "visible"
-                        }}
                     >
 
                         <defs>
@@ -853,36 +727,28 @@ function WatchlistDetails() {
                                     <g key={index}>
 
                                         <line
-                                            x1={
-                                                padding.left
-                                            }
-
+                                            x1={padding.left}
                                             x2={
                                                 chartWidth -
                                                 padding.right
                                             }
-
                                             y1={y}
                                             y2={y}
-
-                                            stroke="#e5e7eb"
+                                            stroke="#262d45"
                                         />
-
 
                                         <text
                                             x="10"
                                             y={y + 5}
                                             fontSize="15"
-                                            fill="#4b5563"
+                                            fill="#9aa1b8"
                                         >
-
                                             ₹
                                             {Math.round(
                                                 price
                                             ).toLocaleString(
                                                 "en-IN"
                                             )}
-
                                         </text>
 
                                     </g>
@@ -897,9 +763,7 @@ function WatchlistDetails() {
 
                         <path
                             d={areaPath}
-                            fill={
-                                "url(#watchlistChartGradient)"
-                            }
+                            fill="url(#watchlistChartGradient)"
                         />
 
 
@@ -922,28 +786,16 @@ function WatchlistDetails() {
 
                                 <circle
                                     key={index}
-
                                     cx={point.x}
                                     cy={point.y}
-
                                     r="12"
-
                                     fill="transparent"
-
-                                    style={{
-                                        cursor: "pointer"
-                                    }}
-
+                                    style={{ cursor: "pointer" }}
                                     onMouseEnter={() =>
-                                        setHoveredPoint(
-                                            point
-                                        )
+                                        setHoveredPoint(point)
                                     }
-
                                     onMouseLeave={() =>
-                                        setHoveredPoint(
-                                            null
-                                        )
+                                        setHoveredPoint(null)
                                     }
                                 />
 
@@ -958,128 +810,87 @@ function WatchlistDetails() {
                             <g>
 
                                 <line
-                                    x1={
-                                        hoveredPoint.x
-                                    }
-
-                                    x2={
-                                        hoveredPoint.x
-                                    }
-
-                                    y1={
-                                        padding.top
-                                    }
-
+                                    x1={hoveredPoint.x}
+                                    x2={hoveredPoint.x}
+                                    y1={padding.top}
                                     y2={
                                         padding.top +
                                         graphHeight
                                     }
-
-                                    stroke="#6b7280"
-
+                                    stroke="#656d87"
                                     strokeDasharray="4 5"
                                 />
 
-
                                 <circle
-                                    cx={
-                                        hoveredPoint.x
-                                    }
-
-                                    cy={
-                                        hoveredPoint.y
-                                    }
-
+                                    cx={hoveredPoint.x}
+                                    cy={hoveredPoint.y}
                                     r="6"
-
                                     fill={chartColor}
                                 />
-
 
                                 <rect
                                     x={
                                         Math.min(
-                                            hoveredPoint.x +
-                                            15,
-                                            chartWidth -
-                                            190
+                                            hoveredPoint.x + 15,
+                                            chartWidth - 190
                                         )
                                     }
-
                                     y={
                                         Math.max(
-                                            hoveredPoint.y -
-                                            65,
+                                            hoveredPoint.y - 65,
                                             10
                                         )
                                     }
-
                                     width="175"
                                     height="55"
                                     rx="8"
-
-                                    fill="white"
-
-                                    stroke="#d1d5db"
+                                    fill="#1a2036"
+                                    stroke="#262d45"
                                 />
-
 
                                 <text
                                     x={
                                         Math.min(
-                                            hoveredPoint.x +
-                                            28,
-                                            chartWidth -
-                                            177
+                                            hoveredPoint.x + 28,
+                                            chartWidth - 177
                                         )
                                     }
-
                                     y={
                                         Math.max(
-                                            hoveredPoint.y -
-                                            40,
+                                            hoveredPoint.y - 40,
                                             35
                                         )
                                     }
-
                                     fontSize="16"
-
-                                    fill="#111827"
+                                    fill="#e7e9f2"
                                 >
 
                                     ₹
                                     {hoveredPoint.price.toLocaleString(
                                         "en-IN",
                                         {
-                                            minimumFractionDigits:
-                                                2
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
                                         }
                                     )}
 
                                 </text>
 
-
                                 <text
                                     x={
                                         Math.min(
-                                            hoveredPoint.x +
-                                            28,
-                                            chartWidth -
-                                            177
+                                            hoveredPoint.x + 28,
+                                            chartWidth - 177
                                         )
                                     }
-
                                     y={
                                         Math.max(
-                                            hoveredPoint.y -
-                                            18,
+                                            hoveredPoint.y - 18,
                                             55
                                         )
                                     }
-
                                     fontSize="13"
-
-                                    fill="#6b7280"
+                                    fill="#9aa1b8"
                                 >
 
                                     {hoveredPoint.date}
@@ -1118,7 +929,7 @@ function WatchlistDetails() {
 
                                         fontSize="14"
 
-                                        fill="#4b5563"
+                                        fill="#9aa1b8"
                                     >
                                         {point.date}
                                     </text>
@@ -1130,14 +941,7 @@ function WatchlistDetails() {
 
                 ) : (
 
-                    <div
-                        style={{
-                            height: "350px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center"
-                        }}
-                    >
+                    <div className="chart-empty">
                         No price history available
                     </div>
 
@@ -1150,75 +954,46 @@ function WatchlistDetails() {
             {/* STOCK INFORMATION */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    marginTop: "30px",
-                    paddingTop: "25px",
-                    borderTop:
-                        "1px solid #e5e7eb",
-
-                    display: "grid",
-
-                    gridTemplateColumns:
-                        "repeat(auto-fit, minmax(180px, 1fr))",
-
-                    gap: "25px"
-                }}
-            >
+            <div className="stat-grid">
 
                 <div>
-
-                    <p>
+                    <div className="stat-label">
                         Company
-                    </p>
-
-                    <strong>
+                    </div>
+                    <div className="stat-value">
                         {stock.companyName}
-                    </strong>
-
+                    </div>
                 </div>
 
-
                 <div>
-
-                    <p>
+                    <div className="stat-label">
                         Symbol
-                    </p>
-
-                    <strong>
+                    </div>
+                    <div className="stat-value">
                         {stock.symbol}
-                    </strong>
-
+                    </div>
                 </div>
 
-
                 <div>
-
-                    <p>
+                    <div className="stat-label">
                         Exchange
-                    </p>
-
-                    <strong>
+                    </div>
+                    <div className="stat-value">
                         {stock.exchange}
-                    </strong>
-
+                    </div>
                 </div>
 
-
                 <div>
-
-                    <p>
+                    <div className="stat-label">
                         Added On
-                    </p>
-
-                    <strong>
+                    </div>
+                    <div className="stat-value">
                         {new Date(
                             stock.createdAt
                         ).toLocaleDateString(
                             "en-IN"
                         )}
-                    </strong>
-
+                    </div>
                 </div>
 
             </div>
@@ -1228,24 +1003,18 @@ function WatchlistDetails() {
             {/* BACK BUTTON */}
             {/* ================================= */}
 
-            <button
-                onClick={() =>
-                    navigate("/watchlist")
-                }
+            <div className="back-button-row">
+                <button
+                    className="btn btn-secondary"
+                    onClick={() =>
+                        navigate("/watchlist")
+                    }
+                >
+                    ← Back to Watchlist
+                </button>
+            </div>
 
-                style={{
-                    marginTop: "40px",
-                    padding: "12px 20px",
-                    background: "white",
-                    border:
-                        "1px solid #d1d5db",
-                    borderRadius: "8px",
-                    cursor: "pointer"
-                }}
-            >
-                ← Back to Watchlist
-            </button>
-
+          </div>
         </div>
 
     );

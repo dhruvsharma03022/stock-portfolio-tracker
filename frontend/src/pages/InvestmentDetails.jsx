@@ -312,12 +312,7 @@ function InvestmentDetails() {
 
         return (
 
-            <div
-                style={{
-                    padding: "60px",
-                    textAlign: "center"
-                }}
-            >
+            <div className="state-page">
                 <h1>
                     Loading investment...
                 </h1>
@@ -336,26 +331,17 @@ function InvestmentDetails() {
 
         return (
 
-            <div
-                style={{
-                    padding: "60px",
-                    textAlign: "center"
-                }}
-            >
+            <div className="state-page">
 
                 <h1>
                     Investment Details
                 </h1>
 
-                <p
-                    style={{
-                        color: "red"
-                    }}
-                >
+                <p className="error-text">
                     {error}
                 </p>
 
-                <button
+                <button className="btn btn-secondary"
                     onClick={() =>
                         navigate("/dashboard")
                     }
@@ -508,52 +494,25 @@ function InvestmentDetails() {
 
     return (
 
-        <div
-            style={{
-                maxWidth: "1150px",
-                margin: "30px auto",
-                padding: "20px",
-                fontFamily:
-                    "Arial, sans-serif",
-                color: "#1f2937"
-            }}
-        >
+        <div className="page">
+          <div className="page-inner">
 
 
             {/* ================================= */}
             {/* STOCK HEADER */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: "20px"
-                }}
-            >
+            <div className="detail-header">
 
                 <div>
 
-                    <h1
-                        style={{
-                            margin: 0,
-                            fontSize: "42px",
-                            fontWeight: "600"
-                        }}
-                    >
+                    <h1 className="detail-symbol">
                         {investment.symbol}
                     </h1>
 
                     {investment.companyName && (
 
-                        <p
-                            style={{
-                                color: "#6b7280",
-                                fontSize: "17px"
-                            }}
-                        >
+                        <p className="detail-company">
                             {investment.companyName}
                         </p>
 
@@ -562,17 +521,7 @@ function InvestmentDetails() {
                 </div>
 
 
-                <button
-                    style={{
-                        background: "#2563eb",
-                        color: "white",
-                        border: "none",
-                        padding: "13px 28px",
-                        borderRadius: "28px",
-                        fontSize: "17px",
-                        cursor: "pointer"
-                    }}
-                >
+                <button className="btn btn-primary btn-pill">
                     + Follow
                 </button>
 
@@ -583,22 +532,9 @@ function InvestmentDetails() {
             {/* CURRENT PRICE */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "18px",
-                    flexWrap: "wrap",
-                    marginTop: "30px"
-                }}
-            >
+            <div className="price-row">
 
-                <div
-                    style={{
-                        fontSize: "48px",
-                        fontWeight: "500"
-                    }}
-                >
+                <div className="price-current">
                     ₹
                     {currentPrice !== null
                         ? currentPrice.toLocaleString(
@@ -616,29 +552,7 @@ function InvestmentDetails() {
                 {chartData && (
 
                     <>
-                        <div
-                            style={{
-                                background:
-                                    isPositive
-                                        ? "#e7f3ec"
-                                        : "#fde8e8",
-
-                                color:
-                                    chartColor,
-
-                                padding:
-                                    "10px 16px",
-
-                                borderRadius:
-                                    "12px",
-
-                                fontSize:
-                                    "21px",
-
-                                fontWeight:
-                                    "500"
-                            }}
-                        >
+                        <div className={`price-change-badge ${isPositive ? "positive" : "negative"}`}>
                             {isPositive
                                 ? "↑"
                                 : "↓"
@@ -652,12 +566,7 @@ function InvestmentDetails() {
                         </div>
 
 
-                        <div
-                            style={{
-                                fontSize: "21px",
-                                color: chartColor
-                            }}
-                        >
+                        <div className={`price-change-abs ${isPositive ? "positive" : "negative"}`}>
                             {chartData.difference >= 0
                                 ? "+"
                                 : ""
@@ -680,15 +589,7 @@ function InvestmentDetails() {
             {/* PERIOD BUTTONS */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginTop: "35px",
-                    borderBottom:
-                        "1px solid #e5e7eb"
-                }}
-            >
+            <div className="period-tabs">
 
                 {[
                     "1D",
@@ -704,20 +605,7 @@ function InvestmentDetails() {
 
                         <div
                             key={period}
-                            style={{
-                                padding:
-                                    "14px 10px",
-                                color:
-                                    index === 2
-                                        ? "#2563eb"
-                                        : "#4b5563",
-                                fontSize:
-                                    "18px",
-                                borderBottom:
-                                    index === 2
-                                        ? "4px solid #2563eb"
-                                        : "4px solid transparent"
-                            }}
+                            className={`period-tab ${index === 2 ? "active" : ""}`}
                         >
                             {period}
                         </div>
@@ -732,24 +620,13 @@ function InvestmentDetails() {
             {/* CUSTOM SVG CHART */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    width: "100%",
-                    marginTop: "20px",
-                    overflowX: "auto",
-                    background: "#ffffff"
-                }}
-            >
+            <div className="chart-card">
 
                 {points.length > 0 ? (
 
                     <svg
                         viewBox={`0 0 ${chartWidth} ${chartHeight}`}
                         width="100%"
-                        style={{
-                            minWidth: "700px",
-                            overflow: "visible"
-                        }}
                     >
 
                         <defs>
@@ -813,14 +690,14 @@ function InvestmentDetails() {
                                             }
                                             y1={y}
                                             y2={y}
-                                            stroke="#e5e7eb"
+                                            stroke="#262d45"
                                         />
 
                                         <text
                                             x="10"
                                             y={y + 5}
                                             fontSize="15"
-                                            fill="#4b5563"
+                                            fill="#9aa1b8"
                                         >
                                             ₹
                                             {Math.round(
@@ -865,28 +742,16 @@ function InvestmentDetails() {
 
                                 <circle
                                     key={index}
-
                                     cx={point.x}
                                     cy={point.y}
-
                                     r="12"
-
                                     fill="transparent"
-
-                                    style={{
-                                        cursor: "pointer"
-                                    }}
-
+                                    style={{ cursor: "pointer" }}
                                     onMouseEnter={() =>
-                                        setHoveredPoint(
-                                            point
-                                        )
+                                        setHoveredPoint(point)
                                     }
-
                                     onMouseLeave={() =>
-                                        setHoveredPoint(
-                                            null
-                                        )
+                                        setHoveredPoint(null)
                                     }
                                 />
 
@@ -901,28 +766,20 @@ function InvestmentDetails() {
                             <g>
 
                                 <line
-                                    x1={
-                                        hoveredPoint.x
-                                    }
-                                    x2={
-                                        hoveredPoint.x
-                                    }
+                                    x1={hoveredPoint.x}
+                                    x2={hoveredPoint.x}
                                     y1={padding.top}
                                     y2={
                                         padding.top +
                                         graphHeight
                                     }
-                                    stroke="#6b7280"
+                                    stroke="#656d87"
                                     strokeDasharray="4 5"
                                 />
 
                                 <circle
-                                    cx={
-                                        hoveredPoint.x
-                                    }
-                                    cy={
-                                        hoveredPoint.y
-                                    }
+                                    cx={hoveredPoint.x}
+                                    cy={hoveredPoint.y}
                                     r="6"
                                     fill={chartColor}
                                 />
@@ -943,8 +800,8 @@ function InvestmentDetails() {
                                     width="175"
                                     height="55"
                                     rx="8"
-                                    fill="white"
-                                    stroke="#d1d5db"
+                                    fill="#1a2036"
+                                    stroke="#262d45"
                                 />
 
                                 <text
@@ -961,15 +818,18 @@ function InvestmentDetails() {
                                         )
                                     }
                                     fontSize="16"
-                                    fill="#111827"
+                                    fill="#e7e9f2"
                                 >
+
                                     ₹
                                     {hoveredPoint.price.toLocaleString(
                                         "en-IN",
                                         {
-                                            minimumFractionDigits: 2
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
                                         }
                                     )}
+
                                 </text>
 
                                 <text
@@ -986,9 +846,11 @@ function InvestmentDetails() {
                                         )
                                     }
                                     fontSize="13"
-                                    fill="#6b7280"
+                                    fill="#9aa1b8"
                                 >
+
                                     {hoveredPoint.date}
+
                                 </text>
 
                             </g>
@@ -1023,7 +885,7 @@ function InvestmentDetails() {
 
                                         fontSize="14"
 
-                                        fill="#4b5563"
+                                        fill="#9aa1b8"
                                     >
                                         {point.date}
                                     </text>
@@ -1035,14 +897,7 @@ function InvestmentDetails() {
 
                 ) : (
 
-                    <div
-                        style={{
-                            height: "350px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center"
-                        }}
-                    >
+                    <div className="chart-empty">
                         No price history available
                     </div>
 
@@ -1055,81 +910,54 @@ function InvestmentDetails() {
             {/* INVESTMENT STATS */}
             {/* ================================= */}
 
-            <div
-                style={{
-                    marginTop: "30px",
-                    paddingTop: "25px",
-                    borderTop:
-                        "1px solid #e5e7eb",
-                    display: "grid",
-                    gridTemplateColumns:
-                        "repeat(auto-fit, minmax(160px, 1fr))",
-                    gap: "25px"
-                }}
-            >
+            <div className="stat-grid">
 
                 <div>
-                    <p>Buy Price</p>
-                    <strong>
+                    <div className="stat-label">Buy Price</div>
+                    <div className="stat-value">
                         ₹
                         {Number(
                             investment.buyPrice
                         ).toLocaleString()}
-                    </strong>
+                    </div>
                 </div>
 
                 <div>
-                    <p>Quantity</p>
-                    <strong>
+                    <div className="stat-label">Quantity</div>
+                    <div className="stat-value">
                         {investment.quantity}
-                    </strong>
+                    </div>
                 </div>
 
                 <div>
-                    <p>Invested</p>
-                    <strong>
+                    <div className="stat-label">Invested</div>
+                    <div className="stat-value">
                         ₹
                         {investedValue.toLocaleString()}
-                    </strong>
+                    </div>
                 </div>
 
                 <div>
-                    <p>Current Value</p>
-                    <strong>
+                    <div className="stat-label">Current Value</div>
+                    <div className="stat-value">
                         ₹
                         {calculatedCurrentValue.toLocaleString()}
-                    </strong>
+                    </div>
                 </div>
 
                 <div>
-                    <p>Profit / Loss</p>
-
-                    <strong
-                        style={{
-                            color:
-                                profitLoss >= 0
-                                    ? "#2f855a"
-                                    : "#dc2626"
-                        }}
-                    >
+                    <div className="stat-label">Profit / Loss</div>
+                    <div className={`stat-value ${profitLoss >= 0 ? "positive" : "negative"}`}>
                         ₹
                         {profitLoss.toLocaleString()}
-                    </strong>
+                    </div>
                 </div>
 
                 <div>
-                    <p>Return</p>
-
-                    <strong
-                        style={{
-                            color:
-                                returnPercentage >= 0
-                                    ? "#2f855a"
-                                    : "#dc2626"
-                        }}
-                    >
+                    <div className="stat-label">Return</div>
+                    <div className={`stat-value ${returnPercentage >= 0 ? "positive" : "negative"}`}>
                         {returnPercentage.toFixed(2)}%
-                    </strong>
+                    </div>
                 </div>
 
             </div>
@@ -1139,24 +967,18 @@ function InvestmentDetails() {
             {/* BACK */}
             {/* ================================= */}
 
-            <button
-                onClick={() =>
-                    navigate("/dashboard")
-                }
+            <div className="back-button-row">
+                <button
+                    className="btn btn-secondary"
+                    onClick={() =>
+                        navigate("/dashboard")
+                    }
+                >
+                    ← Back to Dashboard
+                </button>
+            </div>
 
-                style={{
-                    marginTop: "40px",
-                    padding: "12px 20px",
-                    background: "white",
-                    border:
-                        "1px solid #d1d5db",
-                    borderRadius: "8px",
-                    cursor: "pointer"
-                }}
-            >
-                ← Back to Dashboard
-            </button>
-
+          </div>
         </div>
 
     );

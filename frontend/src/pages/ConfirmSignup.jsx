@@ -34,47 +34,40 @@ function ConfirmSignup() {
     };
 
     return (
-        <div>
+        <div className="auth-page">
+            <div className="auth-card">
 
-            <h1>Stock Portfolio Tracker</h1>
+                <div className="auth-brand">Stock Portfolio Tracker</div>
+                <h1 className="auth-title">Verify Your Email</h1>
+                <p className="auth-subtitle">
+                    We sent a verification code to <strong>{email}</strong>
+                </p>
 
-            <h2>Verify Your Email</h2>
+                <form className="auth-form" onSubmit={handleConfirm}>
 
-            <p>
-                We sent a verification code to:
-            </p>
+                    <div className="form-group">
+                        <label className="form-label">Verification Code</label>
+                        <input
+                            className="form-input"
+                            type="text"
+                            placeholder="Enter verification code"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            required
+                        />
+                    </div>
 
-            <p>
-                <strong>{email}</strong>
-            </p>
+                    {error && (
+                        <p className="form-error">{error}</p>
+                    )}
 
-            <form onSubmit={handleConfirm}>
+                    <button className="btn btn-primary btn-block" type="submit">
+                        Verify Account
+                    </button>
 
-                <div>
-                    <label>Verification Code</label>
-                    <br />
+                </form>
 
-                    <input
-                        type="text"
-                        placeholder="Enter verification code"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <br />
-
-                <button type="submit">
-                    Verify Account
-                </button>
-
-            </form>
-
-            {error && (
-                <p>{error}</p>
-            )}
-
+            </div>
         </div>
     );
 }

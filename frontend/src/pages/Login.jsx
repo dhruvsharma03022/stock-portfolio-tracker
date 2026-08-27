@@ -45,65 +45,63 @@ function Login() {
     };
 
     return (
-        <div>
+        <div className="auth-page">
+            <div className="auth-card">
 
-            <h1>Stock Portfolio Tracker</h1>
+                <div className="auth-brand">Stock Portfolio Tracker</div>
+                <h1 className="auth-title">Welcome back</h1>
+                <p className="auth-subtitle">Log in to view your portfolio</p>
 
-            <h2>Login</h2>
+                <form className="auth-form" onSubmit={handleLogin}>
 
-            <form onSubmit={handleLogin}>
+                    <div className="form-group">
+                        <label className="form-label">Email</label>
+                        <input
+                            className="form-input"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <div>
-                    <label>Email</label>
-                    <br />
+                    <div className="form-group">
+                        <label className="form-label">Password</label>
+                        <input
+                            className="form-input"
+                            type="password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                    <input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
+                    <div className="auth-links-row">
+                        <Link to="/forgot-password">
+                            Forgot Password?
+                        </Link>
+                    </div>
 
-                <br />
+                    {error && (
+                        <p className="form-error">{error}</p>
+                    )}
 
-                <div>
-                    <label>Password</label>
-                    <br />
+                    <button className="btn btn-primary btn-block" type="submit">
+                        Login
+                    </button>
 
-                    <input
-                        type="password"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
+                </form>
 
-                <br />
-                <p>
-    <Link to="/forgot-password">
-        Forgot Password?
-    </Link>
-</p>
-                <button type="submit">
-                    Login
-                </button>
+                <p className="auth-footer">
+                    Don't have an account?{" "}
+                    <Link to="/signup">
+                        Sign up
+                    </Link>
+                </p>
 
-            </form>
-
-            {error && (
-                <p>{error}</p>
-            )}
-
-            <p>
-                Don't have an account?{" "}
-                <Link to="/signup">
-                    Sign up
-                </Link>
-            </p>
-
+            </div>
         </div>
     );
 }

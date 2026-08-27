@@ -210,80 +210,66 @@ const [showDropdown, setShowDropdown] = useState(false);
     };
 
     return (
-        <div>
+        <div className="page">
+          <div className="page-inner" style={{ maxWidth: "560px" }}>
 
-            <h1>Add Investment</h1>
+            <div className="topbar" style={{ paddingTop: "32px" }}>
+                <h1 className="topbar-title">Add Investment</h1>
+            </div>
 
-            <form onSubmit={handleSubmit}>
+            <form className="auth-form" onSubmit={handleSubmit}>
 
-                <div>
+                <div className="form-group stock-search">
 
-    <label>Search Company</label>
+                    <label className="form-label">Search Company</label>
 
-    <br />
+                    <input
+                        className="form-input"
+                        type="text"
+                        placeholder="Search Tata, Infosys, Reliance..."
+                        value={searchQuery}
+                        onChange={(e) =>
+                            handleStockSearch(e.target.value)
+                        }
+                        required
+                    />
 
-    <input
-        type="text"
-        placeholder="Search Tata, Infosys, Reliance..."
-        value={searchQuery}
-        onChange={(e) =>
-            handleStockSearch(e.target.value)
-        }
-        required
-    />
+                    {showDropdown && stocks.length > 0 && (
 
-    {showDropdown && stocks.length > 0 && (
+                        <div className="stock-dropdown">
 
-        <div
-            style={{
-                border: "1px solid #ccc",
-                maxHeight: "250px",
-                overflowY: "auto",
-                width: "300px"
-            }}
-        >
+                            {stocks.map((stock) => (
 
-            {stocks.map((stock) => (
+                                <div
+                                    className="stock-dropdown-item"
+                                    key={stock.symbol}
+                                    onClick={() =>
+                                        handleSelectStock(stock)
+                                    }
+                                >
 
-                <div
-                    key={stock.symbol}
-                    onClick={() =>
-                        handleSelectStock(stock)
-                    }
-                    style={{
-                        padding: "10px",
-                        cursor: "pointer",
-                        borderBottom:
-                            "1px solid #eee"
-                    }}
-                >
+                                    <strong className="stock-dropdown-name">
+                                        {stock.name}
+                                    </strong>
 
-                    <strong>
-                        {stock.name}
-                    </strong>
+                                    <small className="stock-dropdown-meta">
+                                        {stock.symbol} • {stock.exchange}
+                                    </small>
 
-                    <br />
+                                </div>
 
-                    <small>
-                        {stock.symbol} • {stock.exchange}
-                    </small>
+                            ))}
+
+                        </div>
+
+                    )}
 
                 </div>
 
-            ))}
-
-        </div>
-
-    )}
-
-</div>
-
-                <br />
-
-                <div>
-                    <label>Quantity</label>
-                    <br />
+                <div className="form-group">
+                    <label className="form-label">Quantity</label>
                     <input
+                        className="form-input"
                         type="number"
                         placeholder="Number of shares"
                         value={quantity}
@@ -293,12 +279,10 @@ const [showDropdown, setShowDropdown] = useState(false);
                     />
                 </div>
 
-                <br />
-
-                <div>
-                    <label>Purchase Price</label>
-                    <br />
+                <div className="form-group">
+                    <label className="form-label">Purchase Price</label>
                     <input
+                        className="form-input"
                         type="number"
                         placeholder="Price per share"
                         value={purchasePrice}
@@ -309,42 +293,36 @@ const [showDropdown, setShowDropdown] = useState(false);
                     />
                 </div>
 
-                <br />
+                <div className="form-group">
 
-                <div>
+                    <label className="form-label">Current Market Price</label>
 
-    <label>Current Market Price</label>
+                    {priceLoading ? (
 
-    <br />
+                        <p className="loading-text">
+                            Fetching latest price...
+                        </p>
 
-    {priceLoading ? (
+                    ) : currentPrice ? (
 
-        <p>
-            Fetching latest price...
-        </p>
+                        <p className="stat-value">
+                            ₹ {Number(currentPrice).toLocaleString("en-IN")}
+                        </p>
 
-    ) : currentPrice ? (
+                    ) : (
 
-        <p>
-            ₹ {Number(currentPrice).toLocaleString("en-IN")}
-        </p>
+                        <p className="loading-text">
+                            Select a stock to see current price
+                        </p>
 
-    ) : (
+                    )}
 
-        <p>
-            Select a stock to see current price
-        </p>
+                </div>
 
-    )}
-
-</div>
-
-                <br />
-
-                <div>
-                    <label>Purchase Date</label>
-                    <br />
+                <div className="form-group">
+                    <label className="form-label">Purchase Date</label>
                     <input
+                        className="form-input"
                         type="date"
                         value={purchaseDate}
                         onChange={(e) => setPurchaseDate(e.target.value)}
@@ -352,20 +330,17 @@ const [showDropdown, setShowDropdown] = useState(false);
                     />
                 </div>
 
-                <br />
+                {message && <p className="form-message">{message}</p>}
 
-                <button type="submit">
+                {error && <p className="form-error">{error}</p>}
+
+                <button className="btn btn-primary btn-block" type="submit">
                     Add Investment
                 </button>
 
             </form>
 
-            <br />
-
-            {message && <p>{message}</p>}
-
-            {error && <p>{error}</p>}
-
+          </div>
         </div>
     );
 }

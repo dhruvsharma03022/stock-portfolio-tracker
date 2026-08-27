@@ -96,117 +96,85 @@ function ResetPassword() {
 
     return (
 
-        <div>
+        <div className="auth-page">
+            <div className="auth-card">
 
-            <h1>Reset Password</h1>
-
-            <p>
-                Enter the verification code sent to:
-                <br />
-                <strong>{email}</strong>
-            </p>
-
-
-            <form
-                onSubmit={handleResetPassword}
-            >
-
-                <div>
-
-                    <label>
-                        Verification Code
-                    </label>
-
+                <h1 className="auth-title">Reset Password</h1>
+                <p className="auth-subtitle">
+                    Enter the verification code sent to:
                     <br />
+                    <strong>{email}</strong>
+                </p>
 
-                    <input
-                        type="text"
-                        placeholder="Enter code"
-                        value={code}
-                        onChange={(e) =>
-                            setCode(e.target.value)
-                        }
-                        required
-                    />
+                <form className="auth-form" onSubmit={handleResetPassword}>
 
-                </div>
+                    <div className="form-group">
+                        <label className="form-label">
+                            Verification Code
+                        </label>
+                        <input
+                            className="form-input"
+                            type="text"
+                            placeholder="Enter code"
+                            value={code}
+                            onChange={(e) =>
+                                setCode(e.target.value)
+                            }
+                            required
+                        />
+                    </div>
 
+                    <div className="form-group">
+                        <label className="form-label">
+                            New Password
+                        </label>
+                        <input
+                            className="form-input"
+                            type="password"
+                            placeholder="Enter new password"
+                            value={newPassword}
+                            onChange={(e) =>
+                                setNewPassword(
+                                    e.target.value
+                                )
+                            }
+                            required
+                        />
+                    </div>
 
-                <br />
+                    <div className="form-group">
+                        <label className="form-label">
+                            Confirm New Password
+                        </label>
+                        <input
+                            className="form-input"
+                            type="password"
+                            placeholder="Confirm new password"
+                            value={confirmPassword}
+                            onChange={(e) =>
+                                setConfirmPassword(
+                                    e.target.value
+                                )
+                            }
+                            required
+                        />
+                    </div>
 
+                    {message && (
+                        <p className="form-message">{message}</p>
+                    )}
 
-                <div>
+                    {error && (
+                        <p className="form-error">{error}</p>
+                    )}
 
-                    <label>
-                        New Password
-                    </label>
+                    <button className="btn btn-primary btn-block" type="submit">
+                        Reset Password
+                    </button>
 
-                    <br />
+                </form>
 
-                    <input
-                        type="password"
-                        placeholder="Enter new password"
-                        value={newPassword}
-                        onChange={(e) =>
-                            setNewPassword(
-                                e.target.value
-                            )
-                        }
-                        required
-                    />
-
-                </div>
-
-
-                <br />
-
-
-                <div>
-
-                    <label>
-                        Confirm New Password
-                    </label>
-
-                    <br />
-
-                    <input
-                        type="password"
-                        placeholder="Confirm new password"
-                        value={confirmPassword}
-                        onChange={(e) =>
-                            setConfirmPassword(
-                                e.target.value
-                            )
-                        }
-                        required
-                    />
-
-                </div>
-
-
-                <br />
-
-
-                <button type="submit">
-
-                    Reset Password
-
-                </button>
-
-
-            </form>
-
-
-            {message && (
-                <p>{message}</p>
-            )}
-
-
-            {error && (
-                <p>{error}</p>
-            )}
-
-
+            </div>
         </div>
     );
 }

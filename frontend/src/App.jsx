@@ -11,6 +11,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Market from "./pages/Market";
 import ProtectedRoute from "./components/ProtectedRoute";
 import WatchlistDetails from "./pages/WatchlistDetails";
+import "./App.css";
 function App() {
     return (
         <BrowserRouter>

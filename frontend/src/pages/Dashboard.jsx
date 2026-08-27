@@ -621,49 +621,36 @@ function Dashboard() {
 
     return (
 
-        <div>
+        <div className="page">
+          <div className="page-inner">
 
-            <h1>
-                My Portfolio
-            </h1>
+            <div className="topbar">
+                <h1 className="topbar-title">
+                    My Portfolio
+                </h1>
 
+                {/* ==========================================
+                    NAVIGATION
+                ========================================== */}
 
-            {/* ==========================================
-                NAVIGATION
-            ========================================== */}
+                <div className="topbar-actions">
+                    <Link to="/market">
+                        <button className="btn btn-secondary">
+                            📊 Market
+                        </button>
+                    </Link>
 
-            <button
-                onClick={handleLogout}
-            >
-                Logout
-            </button>
+                    <Link to="/watchlist">
+                        <button className="btn btn-secondary">
+                            ⭐ Watchlist
+                        </button>
+                    </Link>
 
-
-            {" "}
-
-
-            <Link to="/market">
-
-                <button>
-                    📊 Market
-                </button>
-
-            </Link>
-
-
-            {" "}
-
-
-            <Link to="/watchlist">
-
-                <button>
-                    ⭐ Watchlist
-                </button>
-
-            </Link>
-
-
-            <hr />
+                    <button className="btn btn-ghost" onClick={handleLogout}>
+                        Logout
+                    </button>
+                </div>
+            </div>
 
 
             {/* ==========================================
@@ -672,7 +659,7 @@ function Dashboard() {
 
             {loading && (
 
-                <p>
+                <p className="loading-text">
                     Loading investments and prices...
                 </p>
 
@@ -685,7 +672,7 @@ function Dashboard() {
 
             {error && (
 
-                <p>
+                <p className="error-text">
                     Error: {error}
                 </p>
 
@@ -704,82 +691,68 @@ function Dashboard() {
                         PORTFOLIO SUMMARY
                     ================================== */}
 
-                    <div>
+                    <div className="summary-grid">
 
-                        <h3>
-                            Total Invested
-                        </h3>
+                        <div className="summary-card">
+                            <h3 className="summary-card-label">
+                                Total Invested
+                            </h3>
+                            <p className="summary-card-value">
+                                ₹{totalInvested.toLocaleString()}
+                            </p>
+                        </div>
 
-                        <p>
-                            ₹
-                            {totalInvested.toLocaleString()}
-                        </p>
+                        <div className="summary-card">
+                            <h3 className="summary-card-label">
+                                Current Value
+                            </h3>
+                            <p className="summary-card-value">
+                                ₹{currentValue.toLocaleString()}
+                            </p>
+                        </div>
 
-                    </div>
+                        <div className="summary-card">
+                            <h3 className="summary-card-label">
+                                Profit / Loss
+                            </h3>
+                            <p className={`summary-card-value ${profit >= 0 ? "positive" : "negative"}`}>
+                                ₹{profit.toLocaleString()}
+                            </p>
+                        </div>
 
-
-                    <div>
-
-                        <h3>
-                            Current Value
-                        </h3>
-
-                        <p>
-                            ₹
-                            {currentValue.toLocaleString()}
-                        </p>
-
-                    </div>
-
-
-                    <div>
-
-                        <h3>
-                            Profit / Loss
-                        </h3>
-
-                        <p>
-                            ₹
-                            {profit.toLocaleString()}
-                        </p>
-
-                    </div>
-
-
-                    <div>
-
-                        <h3>
-                            Return
-                        </h3>
-
-                        <p>
-                            {returnPercentage.toFixed(2)}%
-                        </p>
+                        <div className="summary-card">
+                            <h3 className="summary-card-label">
+                                Return
+                            </h3>
+                            <p className={`summary-card-value ${returnPercentage >= 0 ? "positive" : "negative"}`}>
+                                {returnPercentage.toFixed(2)}%
+                            </p>
+                        </div>
 
                     </div>
-
-
-                    <hr />
 
 
                     {/* ==================================
                         INVESTMENTS
                     ================================== */}
 
-                    <h2>
-                        My Investments
-                    </h2>
+                    <div className="section-header">
+                        <h2>
+                            My Investments
+                        </h2>
+                    </div>
 
 
                     {investments.length === 0 ? (
 
-                        <p>
+                        <p className="empty-state">
                             You haven't added any investments yet.
                         </p>
 
                     ) : (
 
-                        investments.map(
+                        <div className="card-list">
+                        {investments.map(
                             stock => {
 
                                 const invested =
@@ -821,138 +794,105 @@ function Dashboard() {
                                 return (
 
                                     <div
+                                        className="item-card"
                                         key={
                                             stock.investmentId
                                         }
                                     >
 
-                                        <h3>
-                                            {stock.symbol}
-                                        </h3>
+                                        <div className="item-card-header">
+                                            <span className="item-symbol">
+                                                {stock.symbol}
+                                            </span>
+                                        </div>
 
-
-                                        <p>
+                                        <p className="item-company">
                                             {stock.companyName}
                                         </p>
 
+                                        <div className="item-detail-grid">
 
-                                        <p>
-                                            Quantity:{" "}
-                                            {stock.quantity}
-                                        </p>
+                                            <div>
+                                                <div className="item-detail-label">Quantity</div>
+                                                <div className="item-detail-value">{stock.quantity}</div>
+                                            </div>
 
+                                            <div>
+                                                <div className="item-detail-label">Buy Price</div>
+                                                <div className="item-detail-value">
+                                                    ₹{Number(stock.buyPrice).toLocaleString()}
+                                                </div>
+                                            </div>
 
-                                        <p>
-                                            Buy Price: ₹
-                                            {Number(
-                                                stock.buyPrice
-                                            ).toLocaleString()}
-                                        </p>
+                                            <div>
+                                                <div className="item-detail-label">Current Price</div>
+                                                <div className="item-detail-value">
+                                                    {stock.currentPrice !== null
+                                                        ? <>₹{Number(stock.currentPrice).toLocaleString()}</>
+                                                        : "Unavailable"
+                                                    }
+                                                </div>
+                                            </div>
 
+                                            <div>
+                                                <div className="item-detail-label">Invested</div>
+                                                <div className="item-detail-value">
+                                                    ₹{invested.toLocaleString()}
+                                                </div>
+                                            </div>
 
-                                        <p>
+                                            <div>
+                                                <div className="item-detail-label">Current Value</div>
+                                                <div className="item-detail-value">
+                                                    {stockCurrentValue !== null
+                                                        ? <>₹{stockCurrentValue.toLocaleString()}</>
+                                                        : "Unavailable"
+                                                    }
+                                                </div>
+                                            </div>
 
-                                            Current Price:{" "}
+                                            <div>
+                                                <div className="item-detail-label">Profit / Loss</div>
+                                                <div className={`item-detail-value ${stockProfit !== null ? (stockProfit >= 0 ? "positive" : "negative") : ""}`}>
+                                                    {stockProfit !== null
+                                                        ? <>₹{stockProfit.toLocaleString()}</>
+                                                        : "Unavailable"
+                                                    }
+                                                </div>
+                                            </div>
 
-                                            {stock.currentPrice !== null
+                                        </div>
 
-                                                ? (
-                                                    <>
-                                                        ₹
-                                                        {Number(
-                                                            stock.currentPrice
-                                                        ).toLocaleString()}
-                                                    </>
-                                                )
+                                        <div className="item-card-actions">
+                                            <Link
+                                                to={
+                                                    `/investment/${stock.investmentId}`
+                                                }
+                                            >
+                                                <button className="btn btn-secondary btn-sm">
+                                                    View Details
+                                                </button>
+                                            </Link>
 
-                                                : (
-                                                    "Unavailable"
-                                                )
-                                            }
-
-                                        </p>
-
-
-                                        <p>
-                                            Invested: ₹
-                                            {invested.toLocaleString()}
-                                        </p>
-
-
-                                        <p>
-
-                                            Current Value:{" "}
-
-                                            {stockCurrentValue !== null
-
-                                                ? (
-                                                    <>
-                                                        ₹
-                                                        {stockCurrentValue.toLocaleString()}
-                                                    </>
-                                                )
-
-                                                : (
-                                                    "Unavailable"
-                                                )
-                                            }
-
-                                        </p>
-
-
-                                        <p>
-
-                                            Profit / Loss:{" "}
-
-                                            {stockProfit !== null
-
-                                                ? (
-                                                    <>
-                                                        ₹
-                                                        {stockProfit.toLocaleString()}
-                                                    </>
-                                                )
-
-                                                : (
-                                                    "Unavailable"
-                                                )
-                                            }
-
-                                        </p>
-
-
-                                        <Link
-                                            to={
-                                                `/investment/${stock.investmentId}`
-                                            }
-                                        >
-                                            View Details
-                                        </Link>
-
-
-                                        <br />
-                                        <br />
-
-
-                                        <button
-                                            onClick={() =>
-                                                deleteInvestment(
-                                                    stock.investmentId
-                                                )
-                                            }
-                                        >
-                                            Delete
-                                        </button>
-
-
-                                        <hr />
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={() =>
+                                                    deleteInvestment(
+                                                        stock.investmentId
+                                                    )
+                                                }
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
 
                                     </div>
 
                                 );
 
                             }
-                        )
+                        )}
+                        </div>
 
                     )}
 
@@ -961,20 +901,21 @@ function Dashboard() {
                         ADD INVESTMENT
                     ================================== */}
 
-                    <Link
-                        to="/add-investment"
-                    >
-
-                        <button>
-                            + Add Investment
-                        </button>
-
-                    </Link>
+                    <div className="back-button-row">
+                        <Link
+                            to="/add-investment"
+                        >
+                            <button className="btn btn-primary">
+                                + Add Investment
+                            </button>
+                        </Link>
+                    </div>
 
                 </>
 
             )}
 
+          </div>
         </div>
     );
 }

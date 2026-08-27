@@ -39,61 +39,57 @@ function Signup() {
     };
 
     return (
-        <div>
+        <div className="auth-page">
+            <div className="auth-card">
 
-            <h1>Stock Portfolio Tracker</h1>
+                <div className="auth-brand">Stock Portfolio Tracker</div>
+                <h1 className="auth-title">Create Account</h1>
+                <p className="auth-subtitle">Start tracking your investments</p>
 
-            <h2>Create Account</h2>
+                <form className="auth-form" onSubmit={handleSignup}>
 
-            <form onSubmit={handleSignup}>
+                    <div className="form-group">
+                        <label className="form-label">Email</label>
+                        <input
+                            className="form-input"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                <div>
-                    <label>Email</label>
-                    <br />
+                    <div className="form-group">
+                        <label className="form-label">Password</label>
+                        <input
+                            className="form-input"
+                            type="password"
+                            placeholder="Create a password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                    <input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
+                    {error && (
+                        <p className="form-error">{error}</p>
+                    )}
 
-                <br />
+                    <button className="btn btn-primary btn-block" type="submit">
+                        Create Account
+                    </button>
 
-                <div>
-                    <label>Password</label>
-                    <br />
+                </form>
 
-                    <input
-                        type="password"
-                        placeholder="Create a password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
+                <p className="auth-footer">
+                    Already have an account?{" "}
+                    <Link to="/">
+                        Login
+                    </Link>
+                </p>
 
-                <br />
-
-                <button type="submit">
-                    Create Account
-                </button>
-
-            </form>
-
-            {error && (
-                <p>{error}</p>
-            )}
-
-            <p>
-                Already have an account?{" "}
-                <Link to="/">
-                    Login
-                </Link>
-            </p>
-
+            </div>
         </div>
     );
 }

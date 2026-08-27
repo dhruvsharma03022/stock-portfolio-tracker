@@ -10,7 +10,6 @@ function InvestmentDetails() {
     const [investment, setInvestment] = useState(null);
     const [currentPrice, setCurrentPrice] = useState(null);
     const [historyData, setHistoryData] = useState([]);
-    const [historyMessage, setHistoryMessage] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [hoveredPoint, setHoveredPoint] = useState(null);
@@ -25,16 +24,12 @@ function InvestmentDetails() {
 
     useEffect(() => {
 
-        let cancelled = false;
-
         const loadInvestment = async () => {
 
             try {
 
                 setLoading(true);
                 setError("");
-                setHistoryData([]);
-                setHistoryMessage("");
 
                 const session =
                     await fetchAuthSession();
@@ -72,440 +67,165 @@ function InvestmentDetails() {
                         investmentData.message ||
                         "Failed to load investment"
                     );
+
                 }
 
                 const loadedInvestment =
                     investmentData.investment;
 
-                if (!loadedInvestment) {
-
-                    throw new Error(
-                        "Investment not found"
-                    );
-                }
-
-                if (!cancelled) {
-
-                    setInvestment(
-                        loadedInvestment
-                    );
-                }
+                setInvestment(
+                    loadedInvestment
+                );
 
 
                 // ==========================================
                 // GET CURRENT PRICE
                 // ==========================================
 
-                try {
-
-                    const priceResponse =
-                        await fetch(
-                            `${API_URL}/prices/${encodeURIComponent(
-                                loadedInvestment.symbol
-                            )}`,
-                            {
-                                headers: {
-                                    Authorization:
-                                        `Bearer ${token}`
-                                }
-                            }
-                        );
-
-                    const priceData =
-                        await priceResponse.json();
-
-                    console.log(
-                        "PRICE RESPONSE:",
-                        priceData
-                    );
-
-                    if (!priceResponse.ok) {
-
-                        console.warn(
-                            "PRICE UNAVAILABLE:",
-                            priceData
-                        );
-
-                        if (!cancelled) {
-
-                            setCurrentPrice(null);
-                        }
-
-                    } else {
-
-                        const price =
-                            Number(
-                                priceData.currentPrice
-                            );
-
-                        if (
-                            !Number.isNaN(price) &&
-                            price > 0
-                        ) {
-
-                            if (!cancelled) {
-
-                                setCurrentPrice(
-                                    price
-                                );
-                            }
-
-                        } else {
-
-                            if (!cancelled) {
-
-                                setCurrentPrice(
-                                    null
-                                );
+                const priceResponse =
+                    await fetch(
+                        `${API_URL}/prices/${loadedInvestment.symbol}`,
+                        {
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
                             }
                         }
-                    }
-
-                } catch (priceError) {
-
-                    console.error(
-                        "PRICE LOAD ERROR:",
-                        priceError
                     );
 
-                    if (!cancelled) {
+                const priceData =
+                    await priceResponse.json();
 
-                        setCurrentPrice(
-                            null
-                        );
-                    }
+                console.log(
+                    "PRICE RESPONSE:",
+                    priceData
+                );
+
+                if (!priceResponse.ok) {
+
+                    throw new Error(
+                        priceData.message ||
+                        "Failed to load current price"
+                    );
+
                 }
+
+                setCurrentPrice(
+                    Number(priceData.currentPrice)
+                );
 
 
                 // ==========================================
                 // GET HISTORY
-                // IMPORTANT:
-                // HISTORY FAILURE MUST NOT BREAK PAGE
                 // ==========================================
 
-                try {
-
-                    const historyResponse =
-                        await fetch(
-                            `${API_URL}/history/${encodeURIComponent(
-                                loadedInvestment.symbol
-                            )}`,
-                            {
-                                headers: {
-                                    Authorization:
-                                        `Bearer ${token}`
-                                }
+                const historyResponse =
+                    await fetch(
+                        `${API_URL}/history/${loadedInvestment.symbol}`,
+                        {
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`
                             }
-                        );
-
-                    const historyResponseData =
-                        await historyResponse.json();
-
-                    console.log(
-                        "HISTORY RESPONSE:",
-                        historyResponseData
+                        }
                     );
 
+                const historyResponseData =
+                    await historyResponse.json();
 
-                    // ======================================
-                    // API ERROR
-                    // ======================================
+                console.log(
+                    "HISTORY RESPONSE:",
+                    historyResponseData
+                );
 
-                    if (!historyResponse.ok) {
+                if (!historyResponse.ok) {
 
-                        console.warn(
-                            "HISTORY UNAVAILABLE:",
-                            historyResponseData
+                    throw new Error(
+                        historyResponseData.message ||
+                        "Failed to load history"
+                    );
+
+                }
+
+
+                // ==========================================
+                // FIND PRICE DATASET
+                // ==========================================
+
+                const priceDataset =
+                    historyResponseData
+                        ?.historyData
+                        ?.datasets
+                        ?.find(
+                            dataset =>
+                                dataset.metric === "Price"
                         );
 
-                        if (!cancelled) {
-
-                            setHistoryData([]);
-
-                            setHistoryMessage(
-                                historyResponseData.message ||
-                                "Historical price data is currently unavailable."
-                            );
-                        }
-
-                        return;
-                    }
+                console.log(
+                    "PRICE DATASET:",
+                    priceDataset
+                );
 
 
-                    // ======================================
-                    // API SAYS HISTORY NOT AVAILABLE
-                    // ======================================
+                // ==========================================
+                // FORMAT HISTORY
+                // ==========================================
 
-                    if (
-                        historyResponseData.available === false
-                    ) {
+                if (priceDataset?.values) {
 
-                        if (!cancelled) {
+                    const formattedHistory =
+                        priceDataset.values
+                            .map(item => {
 
-                            setHistoryData([]);
+                                if (
+                                    item &&
+                                    typeof item === "object" &&
+                                    !Array.isArray(item)
+                                ) {
 
-                            setHistoryMessage(
-                                historyResponseData.message ||
-                                "Historical price data is currently unavailable."
-                            );
-                        }
+                                    return {
+                                        date:
+                                            item.date,
 
-                        return;
-                    }
+                                        price:
+                                            Number(item.price)
+                                    };
 
+                                }
 
-                    const rawHistory =
-                        historyResponseData.historyData;
+                                if (Array.isArray(item)) {
 
+                                    return {
+                                        date:
+                                            item[0],
 
-                    // ======================================
-                    // NO HISTORY
-                    // ======================================
+                                        price:
+                                            Number(item[1])
+                                    };
 
-                    if (!rawHistory) {
+                                }
 
-                        if (!cancelled) {
+                                return null;
 
-                            setHistoryData([]);
-
-                            setHistoryMessage(
-                                historyResponseData.message ||
-                                "No historical price data available."
-                            );
-                        }
-
-                        return;
-                    }
-
-
-                    let formattedHistory = [];
-
-
-                    // ======================================
-                    // FORMAT 1
-                    // historyData.datasets
-                    // ======================================
-
-                    if (
-                        rawHistory.datasets &&
-                        Array.isArray(
-                            rawHistory.datasets
-                        )
-                    ) {
-
-                        const priceDataset =
-                            rawHistory.datasets.find(
-                                dataset =>
-                                    dataset.metric === "Price" ||
-                                    dataset.name === "Price" ||
-                                    dataset.label === "Price"
-                            );
-
-                        console.log(
-                            "PRICE DATASET:",
-                            priceDataset
-                        );
-
-                        if (
-                            priceDataset &&
-                            Array.isArray(
-                                priceDataset.values
-                            )
-                        ) {
-
-                            formattedHistory =
-                                priceDataset.values
-                                    .map(
-                                        item => {
-
-                                            // Array format
-                                            // [date, price]
-
-                                            if (
-                                                Array.isArray(
-                                                    item
-                                                )
-                                            ) {
-
-                                                return {
-
-                                                    date:
-                                                        item[0],
-
-                                                    price:
-                                                        Number(
-                                                            item[1]
-                                                        )
-
-                                                };
-                                            }
-
-
-                                            // Object format
-
-                                            if (
-                                                item &&
-                                                typeof item ===
-                                                "object"
-                                            ) {
-
-                                                return {
-
-                                                    date:
-                                                        item.date ||
-                                                        item.timestamp ||
-                                                        item.time ||
-                                                        item.x,
-
-                                                    price:
-                                                        Number(
-                                                            item.price ??
-                                                            item.close ??
-                                                            item.value ??
-                                                            item.y
-                                                        )
-
-                                                };
-                                            }
-
-                                            return null;
-                                        }
+                            })
+                            .filter(
+                                item =>
+                                    item &&
+                                    item.date &&
+                                    !Number.isNaN(
+                                        item.price
                                     )
-                                    .filter(
-                                        item =>
-                                            item &&
-                                            item.date &&
-                                            Number.isFinite(
-                                                item.price
-                                            )
-                                    );
-                        }
-                    }
-
-
-                    // ======================================
-                    // FORMAT 2
-                    // historyData is direct array
-                    // ======================================
-
-                    else if (
-                        Array.isArray(
-                            rawHistory
-                        )
-                    ) {
-
-                        formattedHistory =
-                            rawHistory
-                                .map(
-                                    item => {
-
-                                        // Array format
-                                        // [date, price]
-
-                                        if (
-                                            Array.isArray(
-                                                item
-                                            )
-                                        ) {
-
-                                            return {
-
-                                                date:
-                                                    item[0],
-
-                                                price:
-                                                    Number(
-                                                        item[1]
-                                                    )
-
-                                            };
-                                        }
-
-
-                                        // Object format
-
-                                        if (
-                                            item &&
-                                            typeof item ===
-                                            "object"
-                                        ) {
-
-                                            return {
-
-                                                date:
-                                                    item.date ||
-                                                    item.timestamp ||
-                                                    item.time ||
-                                                    item.x,
-
-                                                price:
-                                                    Number(
-                                                        item.price ??
-                                                        item.close ??
-                                                        item.value ??
-                                                        item.y
-                                                    )
-
-                                            };
-                                        }
-
-                                        return null;
-                                    }
-                                )
-                                .filter(
-                                    item =>
-                                        item &&
-                                        item.date &&
-                                        Number.isFinite(
-                                            item.price
-                                        )
-                                );
-                    }
-
+                            );
 
                     console.log(
                         "FORMATTED HISTORY:",
                         formattedHistory
                     );
 
-
-                    if (!cancelled) {
-
-                        setHistoryData(
-                            formattedHistory
-                        );
-
-                        if (
-                            formattedHistory.length === 0
-                        ) {
-
-                            setHistoryMessage(
-                                historyResponseData.message ||
-                                "Historical price data is currently unavailable."
-                            );
-
-                        } else {
-
-                            setHistoryMessage("");
-                        }
-                    }
-
-
-                } catch (historyError) {
-
-                    console.error(
-                        "HISTORY LOAD ERROR:",
-                        historyError
+                    setHistoryData(
+                        formattedHistory
                     );
 
-                    if (!cancelled) {
-
-                        setHistoryData([]);
-
-                        setHistoryMessage(
-                            "Historical price data is currently unavailable."
-                        );
-                    }
                 }
 
 
@@ -516,31 +236,20 @@ function InvestmentDetails() {
                     error
                 );
 
-                if (!cancelled) {
-
-                    setError(
-                        error.message ||
-                        "Failed to load investment"
-                    );
-                }
+                setError(
+                    error.message ||
+                    "Failed to load investment"
+                );
 
             } finally {
 
-                if (!cancelled) {
+                setLoading(false);
 
-                    setLoading(false);
-                }
             }
-        };
 
+        };
 
         loadInvestment();
-
-
-        return () => {
-
-            cancelled = true;
-        };
 
     }, [investmentId]);
 
@@ -552,49 +261,28 @@ function InvestmentDetails() {
     const chartData = useMemo(() => {
 
         if (!historyData.length) {
-
             return null;
         }
 
         const prices =
-            historyData
-                .map(
-                    item =>
-                        Number(item.price)
-                )
-                .filter(
-                    price =>
-                        Number.isFinite(price)
-                );
-
-
-        if (!prices.length) {
-
-            return null;
-        }
-
+            historyData.map(
+                item => item.price
+            );
 
         const minPrice =
-            Math.min(
-                ...prices
-            );
+            Math.min(...prices);
 
         const maxPrice =
-            Math.max(
-                ...prices
-            );
+            Math.max(...prices);
 
         const firstPrice =
             prices[0];
 
         const lastPrice =
-            prices[
-                prices.length - 1
-            ];
+            prices[prices.length - 1];
 
         const difference =
-            lastPrice -
-            firstPrice;
+            lastPrice - firstPrice;
 
         const percentage =
             firstPrice !== 0
@@ -604,21 +292,13 @@ function InvestmentDetails() {
                 ) * 100
                 : 0;
 
-
         return {
-
             minPrice,
-
             maxPrice,
-
             firstPrice,
-
             lastPrice,
-
             difference,
-
             percentage
-
         };
 
     }, [historyData]);
@@ -633,14 +313,13 @@ function InvestmentDetails() {
         return (
 
             <div className="state-page">
-
                 <h1>
                     Loading investment...
                 </h1>
-
             </div>
 
         );
+
     }
 
 
@@ -662,8 +341,7 @@ function InvestmentDetails() {
                     {error}
                 </p>
 
-                <button
-                    className="btn btn-secondary"
+                <button className="btn btn-secondary"
                     onClick={() =>
                         navigate("/dashboard")
                     }
@@ -674,11 +352,11 @@ function InvestmentDetails() {
             </div>
 
         );
+
     }
 
 
     if (!investment) {
-
         return null;
     }
 
@@ -691,37 +369,21 @@ function InvestmentDetails() {
         Number(investment.quantity) *
         Number(investment.buyPrice);
 
-
     const calculatedCurrentValue =
-        currentPrice !== null
-            ? (
-                Number(
-                    investment.quantity
-                ) *
-                Number(
-                    currentPrice
-                )
-            )
-            : null;
-
+        Number(investment.quantity) *
+        Number(currentPrice);
 
     const profitLoss =
-        calculatedCurrentValue !== null
-            ? (
-                calculatedCurrentValue -
-                investedValue
-            )
-            : null;
-
+        calculatedCurrentValue -
+        investedValue;
 
     const returnPercentage =
-        profitLoss !== null &&
-        investedValue !== 0
-            ? (
+        investedValue === 0
+            ? 0
+            : (
                 profitLoss /
                 investedValue
-            ) * 100
-            : null;
+            ) * 100;
 
 
     // ==========================================
@@ -732,20 +394,16 @@ function InvestmentDetails() {
     const chartHeight = 400;
 
     const padding = {
-
         top: 30,
         right: 30,
         bottom: 50,
         left: 80
-
     };
-
 
     const graphWidth =
         chartWidth -
         padding.left -
         padding.right;
-
 
     const graphHeight =
         chartHeight -
@@ -755,18 +413,14 @@ function InvestmentDetails() {
 
     let points = [];
 
-
     if (
         historyData.length > 0 &&
         chartData
     ) {
 
         const priceRange =
-            (
-                chartData.maxPrice -
-                chartData.minPrice
-            ) || 1;
-
+            chartData.maxPrice -
+            chartData.minPrice || 1;
 
         points =
             historyData.map(
@@ -783,7 +437,6 @@ function InvestmentDetails() {
                         ) *
                         graphWidth;
 
-
                     const y =
                         padding.top +
                         (
@@ -795,18 +448,15 @@ function InvestmentDetails() {
                         ) *
                         graphHeight;
 
-
                     return {
-
                         ...item,
-
                         x,
-
                         y
-
                     };
+
                 }
             );
+
     }
 
 
@@ -814,7 +464,6 @@ function InvestmentDetails() {
         points
             .map(
                 (point, index) =>
-
                     `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`
             )
             .join(" ");
@@ -822,12 +471,12 @@ function InvestmentDetails() {
 
     const areaPath =
         points.length > 0
-
-            ? `${linePath}
-               L ${points[points.length - 1].x} ${chartHeight - padding.bottom}
-               L ${points[0].x} ${chartHeight - padding.bottom}
-               Z`
-
+            ? `
+                ${linePath}
+                L ${points[points.length - 1].x} ${padding.top + graphHeight}
+                L ${points[0].x} ${padding.top + graphHeight}
+                Z
+            `
             : "";
 
 
@@ -839,25 +488,486 @@ function InvestmentDetails() {
 
     const chartColor =
         isPositive
-            ? "#22c55e"
-            : "#ef4444";
+            ? "#2f855a"
+            : "#dc2626";
 
-
-    // ==========================================
-    // UI
-    // ==========================================
 
     return (
 
         <div className="page">
+          <div className="page-inner">
 
-            <div className="page-inner">
+
+            {/* ================================= */}
+            {/* STOCK HEADER */}
+            {/* ================================= */}
+
+            <div className="detail-header">
+
+                <div>
+
+                    <h1 className="detail-symbol">
+                        {investment.symbol}
+                    </h1>
+
+                    {investment.companyName && (
+
+                        <p className="detail-company">
+                            {investment.companyName}
+                        </p>
+
+                    )}
+
+                </div>
 
 
-                {/* ================================= */}
-                {/* BACK BUTTON */}
-                {/* ================================= */}
+                <button className="btn btn-primary btn-pill">
+                    + Follow
+                </button>
 
+            </div>
+
+
+            {/* ================================= */}
+            {/* CURRENT PRICE */}
+            {/* ================================= */}
+
+            <div className="price-row">
+
+                <div className="price-current">
+                    ₹
+                    {currentPrice !== null
+                        ? currentPrice.toLocaleString(
+                            "en-IN",
+                            {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }
+                        )
+                        : "--"
+                    }
+                </div>
+
+
+                {chartData && (
+
+                    <>
+                        <div className={`price-change-badge ${isPositive ? "positive" : "negative"}`}>
+                            {isPositive
+                                ? "↑"
+                                : "↓"
+                            }
+
+                            {" "}
+
+                            {Math.abs(
+                                chartData.percentage
+                            ).toFixed(2)}%
+                        </div>
+
+
+                        <div className={`price-change-abs ${isPositive ? "positive" : "negative"}`}>
+                            {chartData.difference >= 0
+                                ? "+"
+                                : ""
+                            }
+
+                            ₹
+                            {chartData.difference.toFixed(2)}
+
+                            {" today"}
+                        </div>
+
+                    </>
+
+                )}
+
+            </div>
+
+
+            {/* ================================= */}
+            {/* PERIOD BUTTONS */}
+            {/* ================================= */}
+
+            <div className="period-tabs">
+
+                {[
+                    "1D",
+                    "5D",
+                    "1M",
+                    "6M",
+                    "YTD",
+                    "1Y",
+                    "5Y",
+                    "Max"
+                ].map(
+                    (period, index) => (
+
+                        <div
+                            key={period}
+                            className={`period-tab ${index === 2 ? "active" : ""}`}
+                        >
+                            {period}
+                        </div>
+
+                    )
+                )}
+
+            </div>
+
+
+            {/* ================================= */}
+            {/* CUSTOM SVG CHART */}
+            {/* ================================= */}
+
+            <div className="chart-card">
+
+                {points.length > 0 ? (
+
+                    <svg
+                        viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                        width="100%"
+                    >
+
+                        <defs>
+
+                            <linearGradient
+                                id="chartGradient"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                            >
+
+                                <stop
+                                    offset="0%"
+                                    stopColor={chartColor}
+                                    stopOpacity="0.25"
+                                />
+
+                                <stop
+                                    offset="100%"
+                                    stopColor={chartColor}
+                                    stopOpacity="0"
+                                />
+
+                            </linearGradient>
+
+                        </defs>
+
+
+                        {/* GRID LINES */}
+
+                        {[0, 1, 2, 3, 4].map(
+                            index => {
+
+                                const y =
+                                    padding.top +
+                                    (
+                                        index / 4
+                                    ) *
+                                    graphHeight;
+
+                                const price =
+                                    chartData.maxPrice -
+                                    (
+                                        index / 4
+                                    ) *
+                                    (
+                                        chartData.maxPrice -
+                                        chartData.minPrice
+                                    );
+
+                                return (
+
+                                    <g key={index}>
+
+                                        <line
+                                            x1={padding.left}
+                                            x2={
+                                                chartWidth -
+                                                padding.right
+                                            }
+                                            y1={y}
+                                            y2={y}
+                                            stroke="#262d45"
+                                        />
+
+                                        <text
+                                            x="10"
+                                            y={y + 5}
+                                            fontSize="15"
+                                            fill="#9aa1b8"
+                                        >
+                                            ₹
+                                            {Math.round(
+                                                price
+                                            ).toLocaleString(
+                                                "en-IN"
+                                            )}
+                                        </text>
+
+                                    </g>
+
+                                );
+
+                            }
+                        )}
+
+
+                        {/* AREA */}
+
+                        <path
+                            d={areaPath}
+                            fill="url(#chartGradient)"
+                        />
+
+
+                        {/* LINE */}
+
+                        <path
+                            d={linePath}
+                            fill="none"
+                            stroke={chartColor}
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+
+
+                        {/* INTERACTIVE POINTS */}
+
+                        {points.map(
+                            (point, index) => (
+
+                                <circle
+                                    key={index}
+                                    cx={point.x}
+                                    cy={point.y}
+                                    r="12"
+                                    fill="transparent"
+                                    style={{ cursor: "pointer" }}
+                                    onMouseEnter={() =>
+                                        setHoveredPoint(point)
+                                    }
+                                    onMouseLeave={() =>
+                                        setHoveredPoint(null)
+                                    }
+                                />
+
+                            )
+                        )}
+
+
+                        {/* TOOLTIP */}
+
+                        {hoveredPoint && (
+
+                            <g>
+
+                                <line
+                                    x1={hoveredPoint.x}
+                                    x2={hoveredPoint.x}
+                                    y1={padding.top}
+                                    y2={
+                                        padding.top +
+                                        graphHeight
+                                    }
+                                    stroke="#656d87"
+                                    strokeDasharray="4 5"
+                                />
+
+                                <circle
+                                    cx={hoveredPoint.x}
+                                    cy={hoveredPoint.y}
+                                    r="6"
+                                    fill={chartColor}
+                                />
+
+                                <rect
+                                    x={
+                                        Math.min(
+                                            hoveredPoint.x + 15,
+                                            chartWidth - 190
+                                        )
+                                    }
+                                    y={
+                                        Math.max(
+                                            hoveredPoint.y - 65,
+                                            10
+                                        )
+                                    }
+                                    width="175"
+                                    height="55"
+                                    rx="8"
+                                    fill="#1a2036"
+                                    stroke="#262d45"
+                                />
+
+                                <text
+                                    x={
+                                        Math.min(
+                                            hoveredPoint.x + 28,
+                                            chartWidth - 177
+                                        )
+                                    }
+                                    y={
+                                        Math.max(
+                                            hoveredPoint.y - 40,
+                                            35
+                                        )
+                                    }
+                                    fontSize="16"
+                                    fill="#e7e9f2"
+                                >
+
+                                    ₹
+                                    {hoveredPoint.price.toLocaleString(
+                                        "en-IN",
+                                        {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        }
+                                    )}
+
+                                </text>
+
+                                <text
+                                    x={
+                                        Math.min(
+                                            hoveredPoint.x + 28,
+                                            chartWidth - 177
+                                        )
+                                    }
+                                    y={
+                                        Math.max(
+                                            hoveredPoint.y - 18,
+                                            55
+                                        )
+                                    }
+                                    fontSize="13"
+                                    fill="#9aa1b8"
+                                >
+
+                                    {hoveredPoint.date}
+
+                                </text>
+
+                            </g>
+
+                        )}
+
+
+                        {/* X AXIS DATES */}
+
+                        {points
+                            .filter(
+                                (_, index) =>
+                                    index %
+                                    Math.ceil(
+                                        points.length / 5
+                                    ) === 0
+                            )
+                            .map(
+                                (point, index) => (
+
+                                    <text
+                                        key={index}
+
+                                        x={point.x}
+
+                                        y={
+                                            chartHeight -
+                                            15
+                                        }
+
+                                        textAnchor="middle"
+
+                                        fontSize="14"
+
+                                        fill="#9aa1b8"
+                                    >
+                                        {point.date}
+                                    </text>
+
+                                )
+                            )}
+
+                    </svg>
+
+                ) : (
+
+                    <div className="chart-empty">
+                        No price history available
+                    </div>
+
+                )}
+
+            </div>
+
+
+            {/* ================================= */}
+            {/* INVESTMENT STATS */}
+            {/* ================================= */}
+
+            <div className="stat-grid">
+
+                <div>
+                    <div className="stat-label">Buy Price</div>
+                    <div className="stat-value">
+                        ₹
+                        {Number(
+                            investment.buyPrice
+                        ).toLocaleString()}
+                    </div>
+                </div>
+
+                <div>
+                    <div className="stat-label">Quantity</div>
+                    <div className="stat-value">
+                        {investment.quantity}
+                    </div>
+                </div>
+
+                <div>
+                    <div className="stat-label">Invested</div>
+                    <div className="stat-value">
+                        ₹
+                        {investedValue.toLocaleString()}
+                    </div>
+                </div>
+
+                <div>
+                    <div className="stat-label">Current Value</div>
+                    <div className="stat-value">
+                        ₹
+                        {calculatedCurrentValue.toLocaleString()}
+                    </div>
+                </div>
+
+                <div>
+                    <div className="stat-label">Profit / Loss</div>
+                    <div className={`stat-value ${profitLoss >= 0 ? "positive" : "negative"}`}>
+                        ₹
+                        {profitLoss.toLocaleString()}
+                    </div>
+                </div>
+
+                <div>
+                    <div className="stat-label">Return</div>
+                    <div className={`stat-value ${returnPercentage >= 0 ? "positive" : "negative"}`}>
+                        {returnPercentage.toFixed(2)}%
+                    </div>
+                </div>
+
+            </div>
+
+
+            {/* ================================= */}
+            {/* BACK */}
+            {/* ================================= */}
+
+            <div className="back-button-row">
                 <button
                     className="btn btn-secondary"
                     onClick={() =>
@@ -866,568 +976,13 @@ function InvestmentDetails() {
                 >
                     ← Back to Dashboard
                 </button>
-
-
-                {/* ================================= */}
-                {/* STOCK HEADER */}
-                {/* ================================= */}
-
-                <div className="detail-header">
-
-                    <div>
-
-                        <h1 className="detail-symbol">
-
-                            {investment.symbol}
-
-                        </h1>
-
-
-                        {investment.companyName && (
-
-                            <p className="detail-company">
-
-                                {investment.companyName}
-
-                            </p>
-
-                        )}
-
-                    </div>
-
-
-                    <button
-                        className="btn btn-primary btn-pill"
-                    >
-                        + Follow
-                    </button>
-
-                </div>
-
-
-                {/* ================================= */}
-                {/* CURRENT PRICE */}
-                {/* ================================= */}
-
-                <div className="price-row">
-
-                    <div className="price-current">
-
-                        ₹
-
-                        {currentPrice !== null
-                            ? currentPrice.toLocaleString(
-                                "en-IN",
-                                {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                }
-                            )
-                            : "--"
-                        }
-
-                    </div>
-
-
-                    {chartData && (
-
-                        <>
-
-                            <div
-                                className={
-                                    `price-change-badge ${
-                                        isPositive
-                                            ? "positive"
-                                            : "negative"
-                                    }`
-                                }
-                            >
-
-                                {isPositive
-                                    ? "↑"
-                                    : "↓"
-                                }
-
-                                {" "}
-
-                                {Math.abs(
-                                    chartData.percentage
-                                ).toFixed(2)}%
-
-                            </div>
-
-
-                            <div
-                                className={
-                                    `price-change-abs ${
-                                        isPositive
-                                            ? "positive"
-                                            : "negative"
-                                    }`
-                                }
-                            >
-
-                                {chartData.difference >= 0
-                                    ? "+"
-                                    : ""
-                                }
-
-                                ₹
-
-                                {chartData.difference.toFixed(2)}
-
-                            </div>
-
-                        </>
-
-                    )}
-
-                </div>
-
-
-                {/* ================================= */}
-                {/* PERIOD BUTTONS */}
-                {/* ================================= */}
-
-                <div className="period-tabs">
-
-                    {[
-                        "1D",
-                        "5D",
-                        "1M",
-                        "6M",
-                        "YTD",
-                        "1Y",
-                        "5Y",
-                        "Max"
-                    ].map(
-                        (period, index) => (
-
-                            <div
-                                key={period}
-                                className={
-                                    `period-tab ${
-                                        index === 2
-                                            ? "active"
-                                            : ""
-                                    }`
-                                }
-                            >
-
-                                {period}
-
-                            </div>
-
-                        )
-                    )}
-
-                </div>
-
-
-                {/* ================================= */}
-                {/* CHART */}
-                {/* ================================= */}
-
-                <div className="chart-card">
-
-                    {points.length > 0 ? (
-
-                        <svg
-                            viewBox={
-                                `0 0 ${chartWidth} ${chartHeight}`
-                            }
-                            width="100%"
-                        >
-
-                            <defs>
-
-                                <linearGradient
-                                    id="chartGradient"
-                                    x1="0"
-                                    y1="0"
-                                    x2="0"
-                                    y2="1"
-                                >
-
-                                    <stop
-                                        offset="0%"
-                                        stopColor={chartColor}
-                                        stopOpacity="0.25"
-                                    />
-
-                                    <stop
-                                        offset="100%"
-                                        stopColor={chartColor}
-                                        stopOpacity="0"
-                                    />
-
-                                </linearGradient>
-
-                            </defs>
-
-
-                            {/* GRID */}
-
-                            {[0, 1, 2, 3, 4].map(
-                                index => {
-
-                                    const y =
-                                        padding.top +
-                                        (
-                                            index / 4
-                                        ) *
-                                        graphHeight;
-
-
-                                    const price =
-                                        chartData.maxPrice -
-                                        (
-                                            index / 4
-                                        ) *
-                                        (
-                                            chartData.maxPrice -
-                                            chartData.minPrice
-                                        );
-
-
-                                    return (
-
-                                        <g key={index}>
-
-                                            <line
-                                                x1={padding.left}
-                                                x2={
-                                                    chartWidth -
-                                                    padding.right
-                                                }
-                                                y1={y}
-                                                y2={y}
-                                                stroke="#262d45"
-                                            />
-
-                                            <text
-                                                x="10"
-                                                y={y + 5}
-                                                fontSize="15"
-                                                fill="#9aa1b8"
-                                            >
-
-                                                ₹
-
-                                                {Math.round(
-                                                    price
-                                                ).toLocaleString(
-                                                    "en-IN"
-                                                )}
-
-                                            </text>
-
-                                        </g>
-
-                                    );
-                                }
-                            )}
-
-
-                            {/* AREA */}
-
-                            <path
-                                d={areaPath}
-                                fill="url(#chartGradient)"
-                            />
-
-
-                            {/* LINE */}
-
-                            <path
-                                d={linePath}
-                                fill="none"
-                                stroke={chartColor}
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-
-
-                            {/* POINTS */}
-
-                            {points.map(
-                                (point, index) => (
-
-                                    <circle
-                                        key={index}
-                                        cx={point.x}
-                                        cy={point.y}
-                                        r="12"
-                                        fill="transparent"
-                                        style={{
-                                            cursor: "pointer"
-                                        }}
-                                        onMouseEnter={() =>
-                                            setHoveredPoint(
-                                                point
-                                            )
-                                        }
-                                        onMouseLeave={() =>
-                                            setHoveredPoint(
-                                                null
-                                            )
-                                        }
-                                    />
-
-                                )
-                            )}
-
-                        </svg>
-
-                    ) : (
-
-                        <div
-                            style={{
-                                padding: "80px 20px",
-                                textAlign: "center"
-                            }}
-                        >
-
-                            <h3>
-                                Historical data unavailable
-                            </h3>
-
-                            <p>
-
-                                {historyMessage ||
-                                    "Historical price data is currently unavailable for this stock."
-                                }
-
-                            </p>
-
-                        </div>
-
-                    )}
-
-                </div>
-
-
-                {/* ================================= */}
-                {/* HOVER INFORMATION */}
-                {/* ================================= */}
-
-                {hoveredPoint && (
-
-                    <div className="chart-tooltip">
-
-                        <p>
-
-                            {hoveredPoint.date}
-
-                        </p>
-
-                        <strong>
-
-                            ₹
-
-                            {Number(
-                                hoveredPoint.price
-                            ).toLocaleString(
-                                "en-IN"
-                            )}
-
-                        </strong>
-
-                    </div>
-
-                )}
-
-
-                {/* ================================= */}
-                {/* INVESTMENT DETAILS */}
-                {/* ================================= */}
-
-                <div className="investment-details-card">
-
-                    <h2>
-                        Your Investment
-                    </h2>
-
-
-                    <div className="detail-grid">
-
-                        <div>
-
-                            <span>
-                                Quantity
-                            </span>
-
-                            <strong>
-                                {investment.quantity}
-                            </strong>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                Buy Price
-                            </span>
-
-                            <strong>
-
-                                ₹
-
-                                {Number(
-                                    investment.buyPrice
-                                ).toLocaleString(
-                                    "en-IN"
-                                )}
-
-                            </strong>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                Invested
-                            </span>
-
-                            <strong>
-
-                                ₹
-
-                                {investedValue.toLocaleString(
-                                    "en-IN"
-                                )}
-
-                            </strong>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                Current Value
-                            </span>
-
-                            <strong>
-
-                                {calculatedCurrentValue !== null
-                                    ? (
-
-                                        <>
-                                            ₹
-
-                                            {calculatedCurrentValue
-                                                .toLocaleString(
-                                                    "en-IN"
-                                                )
-                                            }
-                                        </>
-
-                                    )
-                                    : "--"
-                                }
-
-                            </strong>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                Profit / Loss
-                            </span>
-
-                            <strong
-                                className={
-                                    profitLoss !== null
-                                        ? (
-                                            profitLoss >= 0
-                                                ? "positive"
-                                                : "negative"
-                                        )
-                                        : ""
-                                }
-                            >
-
-                                {profitLoss !== null
-                                    ? (
-
-                                        <>
-                                            {profitLoss >= 0
-                                                ? "+"
-                                                : ""
-                                            }
-
-                                            ₹
-
-                                            {profitLoss
-                                                .toLocaleString(
-                                                    "en-IN"
-                                                )
-                                            }
-                                        </>
-
-                                    )
-                                    : "--"
-                                }
-
-                            </strong>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                Return
-                            </span>
-
-                            <strong
-                                className={
-                                    returnPercentage !== null
-                                        ? (
-                                            returnPercentage >= 0
-                                                ? "positive"
-                                                : "negative"
-                                        )
-                                        : ""
-                                }
-                            >
-
-                                {returnPercentage !== null
-                                    ? (
-
-                                        <>
-                                            {returnPercentage >= 0
-                                                ? "+"
-                                                : ""
-                                            }
-
-                                            {returnPercentage.toFixed(2)}%
-                                        </>
-
-                                    )
-                                    : "--"
-                                }
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
             </div>
 
+          </div>
         </div>
 
     );
+
 }
 
 export default InvestmentDetails;
